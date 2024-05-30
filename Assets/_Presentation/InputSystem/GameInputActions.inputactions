@@ -1,0 +1,71 @@
+{
+    "name": "GameInputActions",
+    "maps": [
+        {
+            "name": "GlobalActionMap",
+            "id": "60e346b6-c438-46a2-9b28-9c48e08390d8",
+            "actions": [
+                {
+                    "name": "GroupSelection",
+                    "type": "Button",
+                    "id": "27f9cb56-a0d4-4649-b6c7-16958736c29a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectUnit",
+                    "type": "Button",
+                    "id": "81cee999-6d97-4a2c-9bf9-126ebc09d8f5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ddbed40b-b263-4dab-af78-d0f5024c9fb1",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectUnit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7122ea2b-d4c3-4d10-a6af-73d9b07bffa5",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GroupSelection",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "PC",
+            "bindingGroup": "PC",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
