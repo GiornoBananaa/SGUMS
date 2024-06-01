@@ -44,6 +44,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AreaSelection"",
+                    ""type"": ""Button"",
+                    ""id"": ""8fdc4a8f-6a35-42c8-8810-c42868539f97"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -66,6 +75,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""GroupSelection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bba949f9-f2f9-4592-b5ca-0e70fc0271ac"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AreaSelection"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -95,6 +115,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_GlobalActionMap = asset.FindActionMap("GlobalActionMap", throwIfNotFound: true);
         m_GlobalActionMap_GroupSelection = m_GlobalActionMap.FindAction("GroupSelection", throwIfNotFound: true);
         m_GlobalActionMap_SelectUnit = m_GlobalActionMap.FindAction("SelectUnit", throwIfNotFound: true);
+        m_GlobalActionMap_AreaSelection = m_GlobalActionMap.FindAction("AreaSelection", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -158,12 +179,14 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private List<IGlobalActionMapActions> m_GlobalActionMapActionsCallbackInterfaces = new List<IGlobalActionMapActions>();
     private readonly InputAction m_GlobalActionMap_GroupSelection;
     private readonly InputAction m_GlobalActionMap_SelectUnit;
+    private readonly InputAction m_GlobalActionMap_AreaSelection;
     public struct GlobalActionMapActions
     {
         private @GameInputActions m_Wrapper;
         public GlobalActionMapActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @GroupSelection => m_Wrapper.m_GlobalActionMap_GroupSelection;
         public InputAction @SelectUnit => m_Wrapper.m_GlobalActionMap_SelectUnit;
+        public InputAction @AreaSelection => m_Wrapper.m_GlobalActionMap_AreaSelection;
         public InputActionMap Get() { return m_Wrapper.m_GlobalActionMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -179,6 +202,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @SelectUnit.started += instance.OnSelectUnit;
             @SelectUnit.performed += instance.OnSelectUnit;
             @SelectUnit.canceled += instance.OnSelectUnit;
+            @AreaSelection.started += instance.OnAreaSelection;
+            @AreaSelection.performed += instance.OnAreaSelection;
+            @AreaSelection.canceled += instance.OnAreaSelection;
         }
 
         private void UnregisterCallbacks(IGlobalActionMapActions instance)
@@ -189,6 +215,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @SelectUnit.started -= instance.OnSelectUnit;
             @SelectUnit.performed -= instance.OnSelectUnit;
             @SelectUnit.canceled -= instance.OnSelectUnit;
+            @AreaSelection.started -= instance.OnAreaSelection;
+            @AreaSelection.performed -= instance.OnAreaSelection;
+            @AreaSelection.canceled -= instance.OnAreaSelection;
         }
 
         public void RemoveCallbacks(IGlobalActionMapActions instance)
@@ -219,5 +248,6 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     {
         void OnGroupSelection(InputAction.CallbackContext context);
         void OnSelectUnit(InputAction.CallbackContext context);
+        void OnAreaSelection(InputAction.CallbackContext context);
     }
 }

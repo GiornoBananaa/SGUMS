@@ -1,3 +1,4 @@
+using System;
 using UnitSystem;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,13 +12,16 @@ namespace InputSystem
         [SerializeField] private LayerMask _selectableLayerMask;
         private GameInputActions _gameInput;
         private Camera _camera;
-        private UnitSelector _unitSelector;
+        private UnitSelection _unitSelection;
+        private AreaSelector _areaSelector;
         private bool _groupSelection;
+        private bool _dragSelection;
 
         [Inject]
-        public void Construct(UnitSelector unitSelector)
+        public void Construct(UnitSelection unitSelection, AreaSelector areaSelector)
         {
-            _unitSelector = unitSelector;
+            _unitSelection = unitSelection;
+            _areaSelector = areaSelector;
         }
         
         private void Awake()
@@ -26,6 +30,12 @@ namespace InputSystem
             _gameInput.Enable();
             EnableInput();
             _camera = Camera.main;
+        }
+
+        private void Update()
+        {
+            if(_dragSelection)
+                DragSelection();
         }
 
         private void OnDestroy()
@@ -38,6 +48,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.SelectUnit.started += SelectUnit;
             _gameInput.GlobalActionMap.GroupSelection.started += EnableGroupSelection;
             _gameInput.GlobalActionMap.GroupSelection.canceled += DisableGroupSelection;
+            _gameInput.GlobalActionMap.AreaSelection.started += StartAreaSelection;
+            _gameInput.GlobalActionMap.AreaSelection.canceled += EndAreaSelection;
             _gameInput.Enable();
         }
         
@@ -46,6 +58,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.SelectUnit.started -= SelectUnit;
             _gameInput.GlobalActionMap.GroupSelection.started -= EnableGroupSelection;
             _gameInput.GlobalActionMap.GroupSelection.canceled -= DisableGroupSelection;
+            _gameInput.GlobalActionMap.AreaSelection.started -= StartAreaSelection;
+            _gameInput.GlobalActionMap.AreaSelection.canceled -= EndAreaSelection;
             _gameInput.Disable();
         }
 
@@ -60,17 +74,34 @@ namespace InputSystem
             if (!ReadObjectUnderMouse(out RaycastHit hit)) return;
             
             if(!_groupSelection) 
-                _unitSelector.DeselectAll();
+                _unitSelection.DeselectAll();
             if (_selectableLayerMask.ContainsLayer(hit.collider.gameObject.layer))
             {
-                _unitSelector.Select(hit.collider.gameObject.GetComponent<ISelectable>());
+                _unitSelection.Select(hit.collider.gameObject.GetComponent<Unit>());
             }
-            else if (_groupSelection)
+            else if (!_groupSelection)
             {
-                _unitSelector.DeselectAll();
+                _unitSelection.DeselectAll();
             }
         }
 
+        private void StartAreaSelection(InputAction.CallbackContext callbackContext)
+        {
+            _areaSelector.StartSelection(Mouse.current.position.ReadValue());
+            _dragSelection = true;
+        }
+        
+        private void DragSelection()
+        {
+            _areaSelector.SetDragPoint(Mouse.current.position.ReadValue());
+        }
+        
+        private void EndAreaSelection(InputAction.CallbackContext callbackContext)
+        {
+            _areaSelector.EndSelection();
+            _dragSelection = false;
+        }
+        
         private bool ReadObjectUnderMouse(out RaycastHit hit)
         {
             Vector3 mousePosition = Mouse.current.position.ReadValue();
