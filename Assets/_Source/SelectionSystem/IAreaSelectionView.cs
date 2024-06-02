@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnitSystem
+namespace SelectionSystem
 {
     public interface IAreaSelectionView
     {

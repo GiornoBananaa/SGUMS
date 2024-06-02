@@ -1,4 +1,6 @@
 using System;
+using SelectionSystem;
+using UnitGroupingSystem;
 using UnitSystem;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,14 +16,16 @@ namespace InputSystem
         private Camera _camera;
         private UnitSelection _unitSelection;
         private AreaSelector _areaSelector;
+        private UnitGrouper _unitGrouper;
         private bool _groupSelection;
         private bool _dragSelection;
 
         [Inject]
-        public void Construct(UnitSelection unitSelection, AreaSelector areaSelector)
+        public void Construct(UnitSelection unitSelection, UnitGrouper unitGrouper,AreaSelector areaSelector)
         {
             _unitSelection = unitSelection;
             _areaSelector = areaSelector;
+            _unitGrouper = unitGrouper;
         }
         
         private void Awake()
@@ -36,6 +40,11 @@ namespace InputSystem
         {
             if(_dragSelection)
                 DragSelection();
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                _unitGrouper.CreateSquad(_unitSelection.SelectedUnits);
+            }
         }
 
         private void OnDestroy()
@@ -84,7 +93,7 @@ namespace InputSystem
                 _unitSelection.DeselectAll();
             }
         }
-
+        
         private void StartAreaSelection(InputAction.CallbackContext callbackContext)
         {
             _areaSelector.StartSelection(Mouse.current.position.ReadValue());

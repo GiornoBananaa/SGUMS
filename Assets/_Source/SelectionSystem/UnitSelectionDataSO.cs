@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnitSystem
+namespace SelectionSystem
 {
     [CreateAssetMenu(fileName = "UnitSelectionData",menuName = "SO/UnitSelectionData")]
     public class UnitSelectionDataSO : ScriptableObject

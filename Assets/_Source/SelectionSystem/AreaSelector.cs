@@ -1,8 +1,9 @@
+using UnitSystem;
 using UnityEngine;
-using Zenject;
 using Utils;
+using Zenject;
 
-namespace UnitSystem
+namespace SelectionSystem
 {
     public class AreaSelector : IAreaSelector
     {
