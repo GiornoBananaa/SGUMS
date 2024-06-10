@@ -21,18 +21,20 @@ namespace InputSystem
         private UnitSelection _unitSelection;
         private AreaSelector _areaSelector;
         private GroupSelection _groupSelection;
+        private PathCreator _pathCreator;
         private UnitMover _unitMover;
         private bool _isMultiSelection;
         private bool _dragSelection;
 
         [Inject]
         public void Construct(UnitSelection unitSelection,GroupSelection groupSelection, 
-            AreaSelector areaSelector, UnitMover unitMover)
+            AreaSelector areaSelector, UnitMover unitMover, PathCreator pathCreator)
         {
             _unitSelection = unitSelection;
             _areaSelector = areaSelector;
             _groupSelection = groupSelection;
             _unitMover = unitMover;
+            _pathCreator = pathCreator;
         }
         
         private void Awake()
@@ -124,6 +126,27 @@ namespace InputSystem
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
             _unitMover.MoveToPoint(hit.point);
+        }
+        
+        private void StartPathDraw(InputAction.CallbackContext callbackContext)
+        {
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _pathCreator.StartPathCreation();
+        }
+        
+        private void DrawPath(InputAction.CallbackContext callbackContext)
+        {
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _pathCreator.AddPathPoint(hit.point);
+        }
+        
+        private void EndPathDraw(InputAction.CallbackContext callbackContext)
+        {
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _pathCreator.EndPathCreation();
         }
         
         private bool ReadObjectUnderMouse(out RaycastHit hit)
