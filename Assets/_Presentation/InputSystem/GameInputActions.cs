@@ -53,6 +53,24 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveUnitToPoint"",
+                    ""type"": ""Button"",
+                    ""id"": ""c162b89b-1ef9-4e1d-8732-cdeff3fb76aa"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DrawPath"",
+                    ""type"": ""Button"",
+                    ""id"": ""7e869b95-1412-46c5-91aa-87b5bdb948a7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -88,6 +106,28 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""AreaSelection"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""edb017e6-993b-4429-9a69-7bbbd7b8ea6b"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveUnitToPoint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""21927fce-f6a9-4c85-b5d8-29afe23d5316"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DrawPath"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -116,6 +156,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_GlobalActionMap_GroupSelection = m_GlobalActionMap.FindAction("GroupSelection", throwIfNotFound: true);
         m_GlobalActionMap_SelectUnit = m_GlobalActionMap.FindAction("SelectUnit", throwIfNotFound: true);
         m_GlobalActionMap_AreaSelection = m_GlobalActionMap.FindAction("AreaSelection", throwIfNotFound: true);
+        m_GlobalActionMap_MoveUnitToPoint = m_GlobalActionMap.FindAction("MoveUnitToPoint", throwIfNotFound: true);
+        m_GlobalActionMap_DrawPath = m_GlobalActionMap.FindAction("DrawPath", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -180,6 +222,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_GlobalActionMap_GroupSelection;
     private readonly InputAction m_GlobalActionMap_SelectUnit;
     private readonly InputAction m_GlobalActionMap_AreaSelection;
+    private readonly InputAction m_GlobalActionMap_MoveUnitToPoint;
+    private readonly InputAction m_GlobalActionMap_DrawPath;
     public struct GlobalActionMapActions
     {
         private @GameInputActions m_Wrapper;
@@ -187,6 +231,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         public InputAction @GroupSelection => m_Wrapper.m_GlobalActionMap_GroupSelection;
         public InputAction @SelectUnit => m_Wrapper.m_GlobalActionMap_SelectUnit;
         public InputAction @AreaSelection => m_Wrapper.m_GlobalActionMap_AreaSelection;
+        public InputAction @MoveUnitToPoint => m_Wrapper.m_GlobalActionMap_MoveUnitToPoint;
+        public InputAction @DrawPath => m_Wrapper.m_GlobalActionMap_DrawPath;
         public InputActionMap Get() { return m_Wrapper.m_GlobalActionMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -205,6 +251,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @AreaSelection.started += instance.OnAreaSelection;
             @AreaSelection.performed += instance.OnAreaSelection;
             @AreaSelection.canceled += instance.OnAreaSelection;
+            @MoveUnitToPoint.started += instance.OnMoveUnitToPoint;
+            @MoveUnitToPoint.performed += instance.OnMoveUnitToPoint;
+            @MoveUnitToPoint.canceled += instance.OnMoveUnitToPoint;
+            @DrawPath.started += instance.OnDrawPath;
+            @DrawPath.performed += instance.OnDrawPath;
+            @DrawPath.canceled += instance.OnDrawPath;
         }
 
         private void UnregisterCallbacks(IGlobalActionMapActions instance)
@@ -218,6 +270,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @AreaSelection.started -= instance.OnAreaSelection;
             @AreaSelection.performed -= instance.OnAreaSelection;
             @AreaSelection.canceled -= instance.OnAreaSelection;
+            @MoveUnitToPoint.started -= instance.OnMoveUnitToPoint;
+            @MoveUnitToPoint.performed -= instance.OnMoveUnitToPoint;
+            @MoveUnitToPoint.canceled -= instance.OnMoveUnitToPoint;
+            @DrawPath.started -= instance.OnDrawPath;
+            @DrawPath.performed -= instance.OnDrawPath;
+            @DrawPath.canceled -= instance.OnDrawPath;
         }
 
         public void RemoveCallbacks(IGlobalActionMapActions instance)
@@ -249,5 +307,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         void OnGroupSelection(InputAction.CallbackContext context);
         void OnSelectUnit(InputAction.CallbackContext context);
         void OnAreaSelection(InputAction.CallbackContext context);
+        void OnMoveUnitToPoint(InputAction.CallbackContext context);
+        void OnDrawPath(InputAction.CallbackContext context);
     }
 }

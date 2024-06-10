@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnitSystem;
 using UnityEngine;
 
@@ -23,12 +24,20 @@ namespace UnitGroupingSystem
                 return sum/Units.Count;
             }
         }
+
+        public Action OnDisband;
         
         public Group() => Units = new();
         
         public Group(IEnumerable<Unit> units)
         {
             Units = new HashSet<Unit>(units);
+        }
+
+        public void Disband()
+        {
+            Units.Clear();
+            OnDisband?.Invoke();
         }
     }
 }

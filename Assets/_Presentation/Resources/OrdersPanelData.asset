@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 313c3674a4e341d1b4a5c2a67a93ebd1, type: 3}
+  m_Name: OrdersPanelData
+  m_EditorClassIdentifier: 
+  <OrdersData>k__BackingField:
+  - {fileID: 11400000, guid: ced120046be8e0041bf356659bc4ac42, type: 2}
+  - {fileID: 11400000, guid: b617ce7dcec5b9e4db542deba945a745, type: 2}
+  - {fileID: 11400000, guid: 7143110314d821c46a44529f8976c87b, type: 2}
+  <OrderPrefab>k__BackingField: {fileID: 5341517934401482150, guid: e9c22c58aa7385c49b7994e4fbefeb0e, type: 3}

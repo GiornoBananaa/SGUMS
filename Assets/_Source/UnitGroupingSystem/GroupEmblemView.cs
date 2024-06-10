@@ -8,17 +8,18 @@ namespace UnitGroupingSystem
     public class GroupEmblemView : MonoBehaviour, IPointerDownHandler
     {
         private Group _group;
-        private UnitSelection _unitSelection;
+        private GroupSelection _groupSelection;
         
         [Inject]
-        public void Construct(UnitSelection unitSelection)
+        public void Construct(GroupSelection unitSelection)
         {
-            _unitSelection = unitSelection;
+            _groupSelection = unitSelection;
         }
 
         public void SetGroup(Group group)
         {
             _group = group;
+            _group.OnDisband += RemoveEmblem;
         }
         
         private void FixedUpdate()
@@ -32,9 +33,15 @@ namespace UnitGroupingSystem
             transform.position = _group.GroupCenter;
         }
 
+        private void RemoveEmblem()
+        {
+            //TODO: Group Emblem Pool
+            Destroy(gameObject);
+        }
+        
         public void OnPointerDown(PointerEventData eventData)
         {
-            _unitSelection.Select(_group.Units);
+            _groupSelection.Select(_group);
         }
     }
 }

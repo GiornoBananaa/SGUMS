@@ -3,7 +3,7 @@ using UnityEngine;
 using Utils;
 using Zenject;
 
-namespace SelectionSystem
+namespace SelectionSystem.AreaSelectionSystem
 {
     public class AreaSelector : IAreaSelector
     {
@@ -55,10 +55,13 @@ namespace SelectionSystem
                 1000, _unitSelectionData.LayersOfAreaSelectionRayCastTarget);
             Physics.Raycast(camera.ScreenPointToRay(_dragPoint),out RaycastHit hit4, 
                 1000, _unitSelectionData.LayersOfAreaSelectionRayCastTarget);
+            
             foreach (var unit in _unitContainer.PlayerUnits)
             {
-                if (MathUtils.TriangleContainsPoint(new Vector2(unit.transform.position.x,unit.transform.position.z) ,new Vector2(hit1.point.x,hit1.point.z) , new Vector2(hit4.point.x,hit4.point.z),new Vector2(hit2.point.x, hit2.point.z) ) 
-                    || MathUtils.TriangleContainsPoint(new Vector2(unit.transform.position.x,unit.transform.position.z), new Vector2(hit1.point.x,hit1.point.z), new Vector2(hit4.point.x,hit4.point.z), new Vector2(hit3.point.x, hit3.point.z)))// по положению точки относительно сторон чытерех угольника
+                if (MathUtils.TriangleContainsPoint(new Vector2(unit.transform.position.x,unit.transform.position.z) ,new Vector2(hit1.point.x,hit1.point.z) , 
+                                                    new Vector2(hit4.point.x,hit4.point.z),new Vector2(hit2.point.x, hit2.point.z) ) 
+                    || MathUtils.TriangleContainsPoint(new Vector2(unit.transform.position.x,unit.transform.position.z), new Vector2(hit1.point.x,hit1.point.z), 
+                                                    new Vector2(hit4.point.x,hit4.point.z), new Vector2(hit3.point.x, hit3.point.z)))
                 {
                     _unitSelection.Select(unit);
                 }

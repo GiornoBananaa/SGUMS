@@ -1,8 +1,11 @@
 using System;
 using SelectionSystem;
+using SelectionSystem.AreaSelectionSystem;
 using UnitGroupingSystem;
 using UnitSystem;
+using UnitSystem.MovementSystem;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Utils;
 using Zenject;
@@ -12,20 +15,24 @@ namespace InputSystem
     public class InputListener: MonoBehaviour
     {
         [SerializeField] private LayerMask _selectableLayerMask;
+        [SerializeField] private LayerMask _groundLayerMask;
         private GameInputActions _gameInput;
         private Camera _camera;
         private UnitSelection _unitSelection;
         private AreaSelector _areaSelector;
-        private UnitGrouper _unitGrouper;
-        private bool _groupSelection;
+        private GroupSelection _groupSelection;
+        private UnitMover _unitMover;
+        private bool _isMultiSelection;
         private bool _dragSelection;
 
         [Inject]
-        public void Construct(UnitSelection unitSelection, UnitGrouper unitGrouper,AreaSelector areaSelector)
+        public void Construct(UnitSelection unitSelection,GroupSelection groupSelection, 
+            AreaSelector areaSelector, UnitMover unitMover)
         {
             _unitSelection = unitSelection;
             _areaSelector = areaSelector;
-            _unitGrouper = unitGrouper;
+            _groupSelection = groupSelection;
+            _unitMover = unitMover;
         }
         
         private void Awake()
@@ -40,11 +47,6 @@ namespace InputSystem
         {
             if(_dragSelection)
                 DragSelection();
-
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                _unitGrouper.CreateSquad(_unitSelection.SelectedUnits);
-            }
         }
 
         private void OnDestroy()
@@ -59,6 +61,7 @@ namespace InputSystem
             _gameInput.GlobalActionMap.GroupSelection.canceled += DisableGroupSelection;
             _gameInput.GlobalActionMap.AreaSelection.started += StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled += EndAreaSelection;
+            _gameInput.GlobalActionMap.MoveUnitToPoint.canceled += MoveUnitsToPoint;
             _gameInput.Enable();
         }
         
@@ -69,28 +72,33 @@ namespace InputSystem
             _gameInput.GlobalActionMap.GroupSelection.canceled -= DisableGroupSelection;
             _gameInput.GlobalActionMap.AreaSelection.started -= StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled -= EndAreaSelection;
+            _gameInput.GlobalActionMap.MoveUnitToPoint.canceled -= MoveUnitsToPoint;
             _gameInput.Disable();
         }
-
+        
         private void EnableGroupSelection(InputAction.CallbackContext callbackContext) 
-            => _groupSelection = true;
+            => _isMultiSelection = true;
         
         private void DisableGroupSelection(InputAction.CallbackContext callbackContext) 
-            => _groupSelection = false;
+            => _isMultiSelection = false;
         
         private void SelectUnit(InputAction.CallbackContext callbackContext)
         {
-            if (!ReadObjectUnderMouse(out RaycastHit hit)) return;
+            if (!ReadObjectUnderMouse(out RaycastHit hit) || EventSystem.current.IsPointerOverGameObject()) return;
             
-            if(!_groupSelection) 
+            if(!_isMultiSelection)
+            {
                 _unitSelection.DeselectAll();
+                _groupSelection.DeselectAll();
+            }
             if (_selectableLayerMask.ContainsLayer(hit.collider.gameObject.layer))
             {
                 _unitSelection.Select(hit.collider.gameObject.GetComponent<Unit>());
             }
-            else if (!_groupSelection)
+            else if (!_isMultiSelection)
             {
                 _unitSelection.DeselectAll();
+                _groupSelection.DeselectAll();
             }
         }
         
@@ -111,10 +119,25 @@ namespace InputSystem
             _dragSelection = false;
         }
         
+        private void MoveUnitsToPoint(InputAction.CallbackContext callbackContext)
+        {
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _unitMover.MoveToPoint(hit.point);
+        }
+        
         private bool ReadObjectUnderMouse(out RaycastHit hit)
         {
             Vector3 mousePosition = Mouse.current.position.ReadValue();
             if (Physics.Raycast(_camera.ScreenPointToRay(mousePosition), out hit))
+                return true;
+            return false;
+        }
+        
+        private bool ReadObjectUnderMouse(out RaycastHit hit, LayerMask layerMask = default)
+        {
+            Vector3 mousePosition = Mouse.current.position.ReadValue();
+            if (Physics.Raycast(_camera.ScreenPointToRay(mousePosition), out hit, layerMask))
                 return true;
             return false;
         }
