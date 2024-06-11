@@ -3,9 +3,10 @@ using UnityEngine;
 
 namespace UnitSystem.MovementSystem
 {
-    public class UnitPath
+    public class Path
     {
         public List<Vector3> PathPoints = new();
         public List<Unit> Units = new();
+        public PathView PathView;
     }
 }

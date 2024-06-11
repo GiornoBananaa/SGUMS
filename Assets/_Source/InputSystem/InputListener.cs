@@ -25,6 +25,7 @@ namespace InputSystem
         private UnitMover _unitMover;
         private bool _isMultiSelection;
         private bool _dragSelection;
+        private bool _pathDrawing;
 
         [Inject]
         public void Construct(UnitSelection unitSelection,GroupSelection groupSelection, 
@@ -45,12 +46,15 @@ namespace InputSystem
             _camera = Camera.main;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if(_dragSelection)
                 DragSelection();
+            if(_pathDrawing)
+                DrawPath();
         }
-
+        
+        
         private void OnDestroy()
         {
             DisableInput();
@@ -63,7 +67,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.GroupSelection.canceled += DisableGroupSelection;
             _gameInput.GlobalActionMap.AreaSelection.started += StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled += EndAreaSelection;
-            _gameInput.GlobalActionMap.MoveUnitToPoint.canceled += MoveUnitsToPoint;
+            _gameInput.GlobalActionMap.DrawPath.started += StartPathDraw;
+            _gameInput.GlobalActionMap.DrawPath.canceled += EndPathDraw;
             _gameInput.Enable();
         }
         
@@ -74,7 +79,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.GroupSelection.canceled -= DisableGroupSelection;
             _gameInput.GlobalActionMap.AreaSelection.started -= StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled -= EndAreaSelection;
-            _gameInput.GlobalActionMap.MoveUnitToPoint.canceled -= MoveUnitsToPoint;
+            _gameInput.GlobalActionMap.DrawPath.started -= StartPathDraw;
+            _gameInput.GlobalActionMap.DrawPath.canceled -= EndPathDraw;
             _gameInput.Disable();
         }
         
@@ -120,22 +126,16 @@ namespace InputSystem
             _areaSelector.EndSelection();
             _dragSelection = false;
         }
-        
-        private void MoveUnitsToPoint(InputAction.CallbackContext callbackContext)
-        {
-            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
-            
-            _unitMover.MoveToPoint(hit.point);
-        }
-        
+
         private void StartPathDraw(InputAction.CallbackContext callbackContext)
         {
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
             _pathCreator.StartPathCreation();
+            _pathDrawing = true;
         }
         
-        private void DrawPath(InputAction.CallbackContext callbackContext)
+        private void DrawPath()
         {
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
@@ -146,6 +146,7 @@ namespace InputSystem
         {
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
+            _pathDrawing = false;
             _pathCreator.EndPathCreation();
         }
         
