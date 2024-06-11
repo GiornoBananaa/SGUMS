@@ -33,8 +33,6 @@ namespace Core
             //Unit
             Container.Bind<UnitContainer>().AsSingle().WithArguments(_testUnits);
             Container.Bind<UnitMover>().AsSingle();
-            Container.Bind<PathCreator>().AsSingle();
-            Container.Bind<PathDrawer>().AsSingle();
             //Grouping
             Container.Bind<GroupEmblemFactory>().AsSingle().WithArguments(_groupEmblemPrefab, _groupEmblemParent);
             Container.Bind<UnitGroupContainer>().AsSingle();
