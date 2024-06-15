@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f51b93a8e75427d920294983529845c, type: 3}
+  m_Name: PathDataSO
+  m_EditorClassIdentifier: 
+  <PathMaterial>k__BackingField: {fileID: 2100000, guid: 10d0711cf24e48744b388d714b8c6d1c, type: 2}
+  <EndPointMaterial>k__BackingField: {fileID: 2100000, guid: 3fd409ae7f3394842921c2bd5e416681, type: 2}
+  <ProjectorIgnoreLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 119

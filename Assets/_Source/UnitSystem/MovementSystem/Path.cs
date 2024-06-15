@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,6 @@ namespace UnitSystem.MovementSystem
     {
         public List<Vector3> PathPoints = new();
         public List<Unit> Units = new();
-        public PathView PathView;
+        public Action<Path> OnDestroy;
     }
 }

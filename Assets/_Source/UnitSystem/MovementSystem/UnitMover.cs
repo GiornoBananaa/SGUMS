@@ -1,28 +1,52 @@
+using System;
 using System.Collections.Generic;
 using SelectionSystem;
 using UnityEngine;
 using NavMeshCallbackSystem;
+using Unity.VisualScripting;
+using UnityEngine.AI;
 
 namespace UnitSystem.MovementSystem
 {
-    public class UnitMover
+    public class UnitMover: IDisposable
     {
         private readonly UnitSelection _unitSelection;
-        
-        public UnitMover(UnitSelection unitSelection)
+        private readonly PathCreator _pathCreator;
+
+        public UnitMover(UnitSelection unitSelection, PathCreator pathCreator)
         {
             _unitSelection = unitSelection;
+            _pathCreator = pathCreator;
+            _pathCreator.OnPathCreate += MoveOnPath;
         }
-
-        public void MoveOnPath(Path path)
+        
+        private void MoveOnPath(Path path)
         {
             path.Units = new List<Unit>();
+            path.OnDestroy += StopOnPath;
             foreach (var unit in _unitSelection.Selected)
             {
+                if(unit.Path != null)
+                {
+                    unit.Path.Units.Remove(unit);
+                    if (unit.Path.Units.Count == 0)
+                    {
+                        _pathCreator.DestroyPath(unit.Path);
+                    }
+                }
                 unit.Path = path;
+                path.Units.Add(unit);
                 unit.PathPointIndex = -1;
                 UpdateUnitPath(unit);
-                path.Units.Add(unit);
+            }
+        }
+
+        private void StopOnPath(Path path)
+        {
+            path.OnDestroy -= StopOnPath;
+            foreach (var unit in path.Units)
+            {
+                unit.OnDestinationReached -= UpdateUnitPath;
             }
         }
         
@@ -32,7 +56,13 @@ namespace UnitSystem.MovementSystem
             unit.PathPointIndex += 1;
             if ( unit.PathPointIndex >= unit.Path.PathPoints.Count)
             {
+                unit.Path.Units.Remove(unit);
+                if (unit.Path.Units.Count == 0)
+                {
+                    _pathCreator.DestroyPath(unit.Path);
+                }
                 unit.Path = null;
+                
                 return;
             }
             unit.NavMeshAgent.SetDestination(unit.Path.PathPoints[unit.PathPointIndex]);
@@ -51,6 +81,11 @@ namespace UnitSystem.MovementSystem
         public void MoveToPoint(Unit unit, Vector3 point)
         {
             unit.NavMeshAgent.SetDestination(point);
+        }
+
+        public void Dispose()
+        {
+            _pathCreator.OnPathCreate -= MoveOnPath;
         }
     }
 }

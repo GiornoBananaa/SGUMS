@@ -13,6 +13,8 @@ namespace SelectionSystem
         public int SelectedCount => _selectedUnits.Count;
         
         public Action OnSelectionChanged;
+        public Action<Unit> OnUnitSelect;
+        public Action<Unit> OnUnitDeselect;
         
         public void Select(IEnumerable<Unit> units)
         {
@@ -29,6 +31,7 @@ namespace SelectionSystem
         {
             _selectedUnits.Add(unit);
             EnableSelectionView(unit);
+            OnUnitSelect?.Invoke(unit);
             if(_selectionProcessesCount == 0)
                 OnSelectionChanged?.Invoke();
         }
@@ -37,6 +40,7 @@ namespace SelectionSystem
         {
             _selectedUnits.Remove(unit);
             DisableSelectionView(unit);
+            OnUnitDeselect?.Invoke(unit);
             if(_selectionProcessesCount == 0)
                 OnSelectionChanged?.Invoke();
         }
@@ -46,6 +50,7 @@ namespace SelectionSystem
             foreach (var selectable in _selectedUnits)
             {
                 DisableSelectionView(selectable);
+                OnUnitDeselect?.Invoke(selectable);
             }
             _selectedUnits.Clear();
             OnSelectionChanged?.Invoke();

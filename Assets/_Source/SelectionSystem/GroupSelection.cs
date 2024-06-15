@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnitGroupingSystem;
 
 namespace SelectionSystem
@@ -11,6 +12,9 @@ namespace SelectionSystem
         public IEnumerable<Group> Selected => _selectedGroups;
         public int SelectedCount => _selectedGroups.Count;
         
+        public Action<Group> OnGroupSelect;
+        public Action<Group> OnGroupDeselect;
+        
         public GroupSelection(UnitSelection unitSelection)
         {
             _unitSelection = unitSelection;
@@ -20,10 +24,21 @@ namespace SelectionSystem
         {
             _selectedGroups.Add(group);
             _unitSelection.Select(group.Units);
+            OnGroupSelect?.Invoke(group);
+        }
+
+        public void Deselect(Group group)
+        {
+            _selectedGroups.Remove(group);
+            OnGroupDeselect?.Invoke(group);
         }
         
         public void DeselectAll()
         {
+            foreach (var group in _selectedGroups)
+            {
+                OnGroupDeselect?.Invoke(group);
+            }
             _selectedGroups.Clear();
         }
     }

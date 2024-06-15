@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnitSystem;
+using UnitSystem.MovementSystem;
 using UnityEngine;
 
 namespace UnitGroupingSystem
@@ -8,6 +9,7 @@ namespace UnitGroupingSystem
     public class Group
     {
         public HashSet<Unit> Units;
+        public Path Path;
 
         public Vector3 GroupCenter
         {

@@ -38,6 +38,7 @@ namespace SelectionSystem
         {
             _isDrawing = true;
             _areaStart = startPoint;
+            _dragPoint = startPoint;
         }
 
         public void SetDragPoint(Vector2 dragPoint)

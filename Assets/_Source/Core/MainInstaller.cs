@@ -13,6 +13,7 @@ namespace Core
     {
         private const string UNIT_SELECTION_DATA_PATH = "UnitSelectionData";
         private const string ORDER_PANEL_DATA_PATH = "OrdersPanelData";
+        private const string PATH_DATA_PATH = "PathDataSO";
         [SerializeField] private GUIAreaSelectionView _areaSelectionView;
         [SerializeField] private Unit[] _testUnits;
         [SerializeField] private GroupEmblemView _groupEmblemPrefab;
@@ -25,16 +26,20 @@ namespace Core
             Container.Bind<UnitSelectionDataSO>().FromInstance(unitSelectionData).AsSingle();
             OrderPanelDataSO ordersPanelData = Resources.Load<OrderPanelDataSO>(ORDER_PANEL_DATA_PATH);
             Container.Bind<OrderPanelDataSO>().FromInstance(ordersPanelData).AsSingle();
+            PathDataSO pathData = Resources.Load<PathDataSO>(PATH_DATA_PATH);
+            Container.Bind<PathDataSO>().FromInstance(pathData).AsSingle();
             //Order
             Container.Bind<IOrder>().To<SquadFormOrder>().AsSingle();
             Container.Bind<IOrder>().To<SquadDisbandOrder>().AsSingle();
             Container.Bind<IOrder>().To<FormationEnterOrder>().AsSingle();
+            Container.Bind<IOrder>().To<PathCancelOrder>().AsSingle();
             Container.Bind<OrderContainer>().AsSingle();
             //Unit
             Container.Bind<UnitContainer>().AsSingle().WithArguments(_testUnits);
             Container.Bind<UnitMover>().AsSingle();
             Container.Bind<PathCreator>().AsSingle();
             Container.Bind<PathDrawer>().AsSingle();
+            Container.Bind<PathContainer>().AsSingle();
             //Grouping
             Container.Bind<GroupEmblemFactory>().AsSingle().WithArguments(_groupEmblemPrefab, _groupEmblemParent);
             Container.Bind<UnitGroupContainer>().AsSingle();

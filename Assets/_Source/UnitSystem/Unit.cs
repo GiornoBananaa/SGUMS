@@ -27,12 +27,12 @@ namespace UnitSystem
         {
             if(!_trackNavigation) return;
             
-            if (NavMeshAgent.pathStatus == NavMeshPathStatus.PathComplete)
+            
+            if (!NavMeshAgent.pathPending && !NavMeshAgent.hasPath)
             {
+                EndNavigationTracking();
                 OnDestinationReached?.Invoke(this);
             }
-
-            EndNavigationTracking();
         }
         
         private void EndNavigationTracking()
