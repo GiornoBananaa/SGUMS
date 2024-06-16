@@ -1,6 +1,7 @@
 using OrderSystem;
 using SelectionSystem;
 using SelectionSystem.AreaSelectionSystem;
+using UnitFormationSystem;
 using UnitGroupingSystem;
 using UnitSystem;
 using UnitSystem.MovementSystem;
@@ -36,10 +37,12 @@ namespace Core
             Container.Bind<OrderContainer>().AsSingle();
             //Unit
             Container.Bind<UnitContainer>().AsSingle().WithArguments(_testUnits);
+            //Movement
             Container.Bind<UnitMover>().AsSingle();
             Container.Bind<PathCreator>().AsSingle();
             Container.Bind<PathDrawer>().AsSingle();
             Container.Bind<PathContainer>().AsSingle();
+            Container.Bind<FormationSetter>().AsSingle();
             //Grouping
             Container.Bind<GroupEmblemFactory>().AsSingle().WithArguments(_groupEmblemPrefab, _groupEmblemParent);
             Container.Bind<UnitGroupContainer>().AsSingle();

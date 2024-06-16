@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SelectionSystem;
 using UnityEngine;
 using NavMeshCallbackSystem;
+using UnitFormationSystem;
 using Unity.VisualScripting;
 using UnityEngine.AI;
 
@@ -12,11 +13,13 @@ namespace UnitSystem.MovementSystem
     {
         private readonly UnitSelection _unitSelection;
         private readonly PathCreator _pathCreator;
+        private readonly FormationSetter _formationSetter;
 
-        public UnitMover(UnitSelection unitSelection, PathCreator pathCreator)
+        public UnitMover(UnitSelection unitSelection, PathCreator pathCreator, FormationSetter formationSetter)
         {
             _unitSelection = unitSelection;
             _pathCreator = pathCreator;
+            _formationSetter = formationSetter;
             _pathCreator.OnPathCreate += MoveOnPath;
         }
         
@@ -24,6 +27,12 @@ namespace UnitSystem.MovementSystem
         {
             path.Units = new List<Unit>();
             path.OnDestroy += StopOnPath;
+            _formationSetter.EnterFormation(new[]
+            {
+                new Vector2(2,0), new Vector2(3,0), new Vector2(5,2), new Vector2(5,5),
+                new Vector2(3,2), new Vector2(3,5), new Vector2(2,5), new Vector2(2,2),
+                new Vector2(0,5), new Vector2(2,0)
+            });
             foreach (var unit in _unitSelection.Selected)
             {
                 if(unit.Path != null)
@@ -65,7 +74,7 @@ namespace UnitSystem.MovementSystem
                 
                 return;
             }
-            unit.NavMeshAgent.SetDestination(unit.Path.PathPoints[unit.PathPointIndex]);
+            unit.NavMeshAgent.SetDestination(unit.Path.PathPoints[unit.PathPointIndex] + new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y));
             unit.OnDestinationReached += UpdateUnitPath;
             unit.StartNavigationTracking();
         }
