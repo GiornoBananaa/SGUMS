@@ -1,7 +1,6 @@
-using System;
 using SelectionSystem;
 using SelectionSystem.AreaSelectionSystem;
-using UnitGroupingSystem;
+using UnitFormationSystem;
 using UnitSystem;
 using UnitSystem.MovementSystem;
 using UnityEngine;
@@ -22,20 +21,23 @@ namespace InputSystem
         private AreaSelector _areaSelector;
         private GroupSelection _groupSelection;
         private PathCreator _pathCreator;
-        private UnitMover _unitMover;
+        private FormationDrawer _formationDrawer;
         private bool _isMultiSelection;
         private bool _dragSelection;
+        private bool _formationDrawing;
         private bool _pathDrawing;
+        private bool _pathDrawingEnabled = true;
+        private bool _formationDrawingEnabled = false;
 
         [Inject]
         public void Construct(UnitSelection unitSelection,GroupSelection groupSelection, 
-            AreaSelector areaSelector, UnitMover unitMover, PathCreator pathCreator)
+            AreaSelector areaSelector, PathCreator pathCreator, FormationDrawer formationDrawer)
         {
             _unitSelection = unitSelection;
             _areaSelector = areaSelector;
             _groupSelection = groupSelection;
-            _unitMover = unitMover;
             _pathCreator = pathCreator;
+            _formationDrawer = formationDrawer;
         }
         
         private void Awake()
@@ -52,6 +54,8 @@ namespace InputSystem
                 DragSelection();
             if(_pathDrawing)
                 DrawPath();
+            if(_formationDrawing)
+                DrawFormation();
         }
         
         
@@ -69,6 +73,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.AreaSelection.canceled += EndAreaSelection;
             _gameInput.GlobalActionMap.DrawPath.started += StartPathDraw;
             _gameInput.GlobalActionMap.DrawPath.canceled += EndPathDraw;
+            _gameInput.GlobalActionMap.DrawFormation.started += StartFormationDraw;
+            _gameInput.GlobalActionMap.DrawFormation.canceled += EndFormationDraw;
             _gameInput.Enable();
         }
         
@@ -81,6 +87,8 @@ namespace InputSystem
             _gameInput.GlobalActionMap.AreaSelection.canceled -= EndAreaSelection;
             _gameInput.GlobalActionMap.DrawPath.started -= StartPathDraw;
             _gameInput.GlobalActionMap.DrawPath.canceled -= EndPathDraw;
+            _gameInput.GlobalActionMap.DrawFormation.started -= StartFormationDraw;
+            _gameInput.GlobalActionMap.DrawFormation.canceled -= EndFormationDraw;
             _gameInput.Disable();
         }
         
@@ -127,8 +135,21 @@ namespace InputSystem
             _dragSelection = false;
         }
 
+        public void EnableFormationDrawing()
+        {
+            _formationDrawingEnabled = true;
+            _pathDrawingEnabled = false;
+        }
+        
+        public void DisableFormationDrawing()
+        {
+            _formationDrawingEnabled = false;
+            _pathDrawingEnabled = true;
+        }
+        
         private void StartPathDraw(InputAction.CallbackContext callbackContext)
         {
+            if(!_pathDrawingEnabled || _unitSelection.SelectedCount == 0) return;
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
             _pathCreator.StartPathCreation();
@@ -144,10 +165,37 @@ namespace InputSystem
         
         private void EndPathDraw(InputAction.CallbackContext callbackContext)
         {
+            if(!_pathDrawing) return;
             if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
             
             _pathDrawing = false;
             _pathCreator.EndPathCreation();
+        }
+        
+        private void StartFormationDraw(InputAction.CallbackContext callbackContext)
+        {
+            if(!_formationDrawingEnabled) return;
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            if(_pathDrawingEnabled || _unitSelection.SelectedCount == 0) return;
+            
+            _formationDrawer.DrawStartPoint();
+            _formationDrawing = true;
+        }
+        
+        private void DrawFormation()
+        {
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _formationDrawer.DrawPoint(hit.point);
+        }
+        
+        private void EndFormationDraw(InputAction.CallbackContext callbackContext)
+        {
+            if(!_formationDrawing) return;
+            if (!ReadObjectUnderMouse(out RaycastHit hit, _groundLayerMask) || EventSystem.current.IsPointerOverGameObject()) return;
+            
+            _formationDrawing = false;
+            _formationDrawer.DrawLineEnd();
         }
         
         private bool ReadObjectUnderMouse(out RaycastHit hit)

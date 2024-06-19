@@ -12,6 +12,7 @@ namespace UnitSystem.MovementSystem
     public class PathDrawer : IDisposable
     {
         private const float LINE_HEIGHT = 0.2f;
+        private const float MIN_POINT_DISTANCE = 0.2f;
         private readonly Dictionary<Path, PathView> _pathsViews = new();
         private readonly ObjectPool<PathView> _pathViewsPool;
         private readonly Material _lineMaterial;
@@ -20,6 +21,7 @@ namespace UnitSystem.MovementSystem
         private readonly UnitSelection _unitSelection;
         private readonly GroupSelection _groupSelection;
         private PathView _currentPathView;
+        private Vector3 _lastPoint;
 
         [Inject]
         public PathDrawer(PathDataSO pathDataSO, UnitSelection unitSelection, GroupSelection groupSelection)
@@ -48,6 +50,8 @@ namespace UnitSystem.MovementSystem
         public void DrawPoint(Vector3 point)
         {
             var newPositionsCount = _currentPathView.LineRenderer.positionCount + 1;
+            if(newPositionsCount != 0 && Vector3.Distance(point, _lastPoint) < MIN_POINT_DISTANCE) return;
+            _lastPoint = point;
             _currentPathView.LineRenderer.positionCount = newPositionsCount;
             _currentPathView.LineRenderer.SetPosition(newPositionsCount - 1, point + new Vector3(0, LINE_HEIGHT, 0));
             

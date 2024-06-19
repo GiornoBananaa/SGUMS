@@ -17,4 +17,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b617ce7dcec5b9e4db542deba945a745, type: 2}
   - {fileID: 11400000, guid: 7143110314d821c46a44529f8976c87b, type: 2}
   - {fileID: 11400000, guid: 1ff178da5d2905b48a9c280db77a7df2, type: 2}
+  - {fileID: 11400000, guid: 057008c4adf8f21499a10aacd7c618b1, type: 2}
   <OrderPrefab>k__BackingField: {fileID: 5341517934401482150, guid: e9c22c58aa7385c49b7994e4fbefeb0e, type: 3}

@@ -35,6 +35,7 @@ namespace UnitSystem.MovementSystem
         
         public void AddPathPoint(Vector3 point)
         {
+            if(_formingPath == null) return;
             if (!_formingPath.PathPoints.Any())
             {
                 _formingPath.PathPoints.Add(point);
@@ -48,8 +49,10 @@ namespace UnitSystem.MovementSystem
         
         public void EndPathCreation()
         {
+            if(_formingPath == null) return;
             _pathDrawer.DrawPathEnd(_formingPath.PathPoints[^1]);
             OnPathCreate?.Invoke(_formingPath);
+            _formingPath = null;
         }
 
         public void DestroyPath(Path path)

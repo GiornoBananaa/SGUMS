@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using SelectionSystem;
 using UnityEngine;
-using NavMeshCallbackSystem;
 using UnitFormationSystem;
-using Unity.VisualScripting;
-using UnityEngine.AI;
 
 namespace UnitSystem.MovementSystem
 {
@@ -27,12 +24,13 @@ namespace UnitSystem.MovementSystem
         {
             path.Units = new List<Unit>();
             path.OnDestroy += StopOnPath;
+            /*
             _formationSetter.EnterFormation(new[]
             {
                 new Vector2(2,0), new Vector2(3,0), new Vector2(5,2), new Vector2(5,5),
                 new Vector2(3,2), new Vector2(3,5), new Vector2(2,5), new Vector2(2,2),
                 new Vector2(0,5), new Vector2(2,0)
-            });
+            });*/
             foreach (var unit in _unitSelection.Selected)
             {
                 if(unit.Path != null)

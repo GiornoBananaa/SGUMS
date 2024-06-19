@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: FormSquadOrderData
   m_EditorClassIdentifier: 
   <OrderType>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 2b9bf8ec5d54fe249ac9e20979ccd42c, type: 3}
   <Description>k__BackingField: Form squad

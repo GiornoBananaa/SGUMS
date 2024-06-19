@@ -26,26 +26,49 @@ namespace UnitFormationSystem
             }
         }
         
-        public List<Vector2> DistributePoints(Vector2[] boundaryPoints, int numPoints, float minDistance = 1)
+        public List<Vector2> DistributePoints(Vector2[] boundaryPoints, int numPoints, float minDistance = 1.5f)
         {
             float width = 0;
             float height = 0;
+
+            float lowestXPoint = boundaryPoints[0].x;
+            float lowestYPoint = boundaryPoints[0].y;
+            
             foreach (var point in boundaryPoints)
             {
+                if (point.x < lowestXPoint)
+                    lowestXPoint = point.x;
+                if (point.y < lowestYPoint)
+                    lowestYPoint = point.y;
                 if(point.x > width)
                     width = point.x;
                 if(point.y > height)
                     height = point.y;
             }
             
+            width -= lowestXPoint;
+            height -= lowestYPoint;
+
+            float maxValue = width < height ? height : width;
+            
+            for (int i = 0; i < boundaryPoints.Length; i++)
+            {
+                boundaryPoints[i] = new Vector2((boundaryPoints[i].x - lowestXPoint) / maxValue, (boundaryPoints[i].y - lowestYPoint) / maxValue);
+            }
+
+            width /= maxValue;
+            height /= maxValue;
+            
             List<Vector2> points = new List<Vector2>();
             int cellsCount = Mathf.CeilToInt(Mathf.Sqrt(numPoints));
             float cellSize = 0;
             int numCellsX = 0;
             int numCellsY = 0;
-
-            while (points.Count < numPoints)
+            int bugBuff = 0;
+            
+            while (points.Count < numPoints && bugBuff < 30)
             {
+                bugBuff++;
                 points.Clear();
                 if(width < height)
                 {
@@ -74,10 +97,12 @@ namespace UnitFormationSystem
                 
                 cellsCount++;
             }
+
+            float sizeModifier = cellsCount * minDistance;
             
             for (int i = 0; i < points.Count; i++)
             {
-                points[i] = points[i] * (1+cellSize/minDistance) - new Vector2(width/2, height/2);
+                points[i] = (points[i] - new Vector2(width/2, height/2)) * sizeModifier;
             }
             
             return points;
@@ -95,20 +120,6 @@ namespace UnitFormationSystem
                 }
             }
             return isInside;
-        }
-        
-        public float CalculateArea(Vector2[] vertices)
-        {
-            float area = 0;
-            int j = vertices.Length - 1;
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                area += (vertices[j].x + vertices[i].x) * (vertices[j].y - vertices[i].y);
-                j = i;
-            }
-
-            return Math.Abs(area / 2);
         }
     }
 }
