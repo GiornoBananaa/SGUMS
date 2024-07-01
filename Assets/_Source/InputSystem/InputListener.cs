@@ -22,7 +22,6 @@ namespace InputSystem
         private GroupSelection _groupSelection;
         private PathCreator _pathCreator;
         private FormationDrawer _formationDrawer;
-        private bool _isMultiSelection;
         private bool _dragSelection;
         private bool _formationDrawing;
         private bool _pathDrawing;
@@ -67,8 +66,8 @@ namespace InputSystem
         public void EnableInput()
         {
             _gameInput.GlobalActionMap.SelectUnit.started += SelectUnit;
-            _gameInput.GlobalActionMap.GroupSelection.started += EnableGroupSelection;
-            _gameInput.GlobalActionMap.GroupSelection.canceled += DisableGroupSelection;
+            _gameInput.GlobalActionMap.GroupSelection.started += EnableMultiSelection;
+            _gameInput.GlobalActionMap.GroupSelection.canceled += DisableMultiSelection;
             _gameInput.GlobalActionMap.AreaSelection.started += StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled += EndAreaSelection;
             _gameInput.GlobalActionMap.DrawPath.started += StartPathDraw;
@@ -81,8 +80,8 @@ namespace InputSystem
         public void DisableInput()
         {
             _gameInput.GlobalActionMap.SelectUnit.started -= SelectUnit;
-            _gameInput.GlobalActionMap.GroupSelection.started -= EnableGroupSelection;
-            _gameInput.GlobalActionMap.GroupSelection.canceled -= DisableGroupSelection;
+            _gameInput.GlobalActionMap.GroupSelection.started -= EnableMultiSelection;
+            _gameInput.GlobalActionMap.GroupSelection.canceled -= DisableMultiSelection;
             _gameInput.GlobalActionMap.AreaSelection.started -= StartAreaSelection;
             _gameInput.GlobalActionMap.AreaSelection.canceled -= EndAreaSelection;
             _gameInput.GlobalActionMap.DrawPath.started -= StartPathDraw;
@@ -92,29 +91,32 @@ namespace InputSystem
             _gameInput.Disable();
         }
         
-        private void EnableGroupSelection(InputAction.CallbackContext callbackContext) 
-            => _isMultiSelection = true;
+        private void EnableMultiSelection(InputAction.CallbackContext callbackContext)
+        {
+            _unitSelection.MultiSelection = true;
+            _groupSelection.MultiSelection = true;
+        }
         
-        private void DisableGroupSelection(InputAction.CallbackContext callbackContext) 
-            => _isMultiSelection = false;
+        private void DisableMultiSelection(InputAction.CallbackContext callbackContext)
+        {
+            _unitSelection.MultiSelection = false;
+            _groupSelection.MultiSelection = false;
+        }
         
         private void SelectUnit(InputAction.CallbackContext callbackContext)
         {
             if (!ReadObjectUnderMouse(out RaycastHit hit) || EventSystem.current.IsPointerOverGameObject()) return;
             
-            if(!_isMultiSelection)
-            {
-                _unitSelection.DeselectAll();
-                _groupSelection.DeselectAll();
-            }
             if (_selectableLayerMask.ContainsLayer(hit.collider.gameObject.layer))
             {
                 _unitSelection.Select(hit.collider.gameObject.GetComponent<Unit>());
             }
-            else if (!_isMultiSelection)
+            else
             {
-                _unitSelection.DeselectAll();
-                _groupSelection.DeselectAll();
+                if(!_groupSelection.MultiSelection)
+                    _groupSelection.DeselectAll();
+                if (!_unitSelection.MultiSelection)
+                    _unitSelection.DeselectAll();
             }
         }
         
@@ -209,7 +211,7 @@ namespace InputSystem
         private bool ReadObjectUnderMouse(out RaycastHit hit, LayerMask layerMask = default)
         {
             Vector3 mousePosition = Mouse.current.position.ReadValue();
-            if (Physics.Raycast(_camera.ScreenPointToRay(mousePosition), out hit, layerMask))
+            if (Physics.Raycast(_camera.ScreenPointToRay(mousePosition), out hit, 1000, layerMask))
                 return true;
             return false;
         }

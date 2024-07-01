@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using SelectionSystem;
-using UnityEngine;
 using UnitFormationSystem;
+using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 namespace UnitSystem.MovementSystem
 {
@@ -11,7 +12,7 @@ namespace UnitSystem.MovementSystem
         private readonly UnitSelection _unitSelection;
         private readonly PathCreator _pathCreator;
         private readonly FormationSetter _formationSetter;
-
+        
         public UnitMover(UnitSelection unitSelection, PathCreator pathCreator, FormationSetter formationSetter)
         {
             _unitSelection = unitSelection;
@@ -24,13 +25,22 @@ namespace UnitSystem.MovementSystem
         {
             path.Units = new List<Unit>();
             path.OnDestroy += StopOnPath;
-            /*
+            
+            List<Unit> unitsWithoutFormation = new List<Unit>();
+            
+            foreach (var unit in _unitSelection.Selected)
+            {
+                if (unit.PathOffset == Vector2.zero)
+                {
+                    unitsWithoutFormation.Add(unit);
+                }
+            }
+            
             _formationSetter.EnterFormation(new[]
             {
-                new Vector2(2,0), new Vector2(3,0), new Vector2(5,2), new Vector2(5,5),
-                new Vector2(3,2), new Vector2(3,5), new Vector2(2,5), new Vector2(2,2),
-                new Vector2(0,5), new Vector2(2,0)
-            });*/
+                new Vector2(0,0), new Vector2(1,0), new Vector2(1,1), new Vector2(0,1)
+            },unitsWithoutFormation);
+            
             foreach (var unit in _unitSelection.Selected)
             {
                 if(unit.Path != null)
@@ -47,13 +57,14 @@ namespace UnitSystem.MovementSystem
                 UpdateUnitPath(unit);
             }
         }
-
+        
         private void StopOnPath(Path path)
         {
             path.OnDestroy -= StopOnPath;
             foreach (var unit in path.Units)
             {
                 unit.OnDestinationReached -= UpdateUnitPath;
+                unit.NavMeshAgent.ResetPath();
             }
         }
         
@@ -81,7 +92,7 @@ namespace UnitSystem.MovementSystem
         {
             foreach (var unit in _unitSelection.Selected)
             {
-                unit.NavMeshAgent.SetDestination(point);
+                unit.NavMeshAgent.SetDestination(point + new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y));
             }
         }
         
@@ -89,7 +100,7 @@ namespace UnitSystem.MovementSystem
         {
             unit.NavMeshAgent.SetDestination(point);
         }
-
+        
         public void Dispose()
         {
             _pathCreator.OnPathCreate -= MoveOnPath;

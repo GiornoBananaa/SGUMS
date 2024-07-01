@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: FormationDrawOrderData
   m_EditorClassIdentifier: 
   <OrderType>k__BackingField: 5
-  <Icon>k__BackingField: {fileID: 21300000, guid: 55747841a2e3b47dab36dc8d5e0dc4df, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 56f601d9ae015964484b363e9f29cac3, type: 3}
   <Description>k__BackingField: Draw custom formation

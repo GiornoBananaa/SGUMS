@@ -11,9 +11,9 @@ namespace OrderSystem
         private readonly GroupSelection _groupSelection;
         
         public Orders OrderType => Orders.SquadForm;
-        public bool Activated => _unitSelection.Selected.Count() > 1 
+        public bool Activated => _unitSelection.SelectedCount > 1 
                                  && !(_groupSelection.SelectedCount == 1 && _unitSelection.SelectedCount == _groupSelection.Selected.First().Units.Count);
-
+        
         public SquadFormOrder(UnitSelection unitSelection, GroupSelection groupSelection, UnitGrouper unitGrouper)
         {
             _unitSelection = unitSelection;

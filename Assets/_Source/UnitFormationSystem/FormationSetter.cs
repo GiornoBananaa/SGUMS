@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SelectionSystem;
+using UnitSystem;
 using UnityEngine;
 
 namespace UnitFormationSystem
@@ -9,24 +11,28 @@ namespace UnitFormationSystem
     {
         private UnitSelection _unitSelection;
 
+        public Action<List<Vector2>, float> OnFormation;
+        private float _formationSize;
+        
         public FormationSetter(UnitSelection unitSelection)
         {
             _unitSelection = unitSelection;
         }
         
-        public void EnterFormation(Vector2[] formation)
+        public void EnterFormation(Vector2[] formation, IEnumerable<Unit> units = null)
         {
-            List<Vector2> points = DistributePoints(formation, _unitSelection.SelectedCount);
+            units ??= _unitSelection.Selected;
+            List<Vector2> points = DistributePoints(formation, units.Count());
             int pointIndex = 0;
-            
-            foreach (var unit in _unitSelection.Selected)
+            foreach (var unit in units)
             {
                 unit.PathOffset = points[pointIndex];
                 pointIndex++;
             }
+            OnFormation?.Invoke(formation.ToList(), _formationSize);
         }
         
-        public List<Vector2> DistributePoints(Vector2[] boundaryPoints, int numPoints, float minDistance = 1.5f)
+        public List<Vector2> DistributePoints(Vector2[] boundaryPoints, int numPoints, float unitsSpacing = 1.5f)
         {
             float width = 0;
             float height = 0;
@@ -66,7 +72,7 @@ namespace UnitFormationSystem
             int numCellsY = 0;
             int bugBuff = 0;
             
-            while (points.Count < numPoints && bugBuff < 30)
+            while (points.Count < numPoints && bugBuff < 200)
             {
                 bugBuff++;
                 points.Clear();
@@ -98,7 +104,8 @@ namespace UnitFormationSystem
                 cellsCount++;
             }
 
-            float sizeModifier = cellsCount * minDistance;
+            float sizeModifier = unitsSpacing / cellSize;
+            _formationSize = sizeModifier;
             
             for (int i = 0; i < points.Count; i++)
             {
@@ -107,7 +114,8 @@ namespace UnitFormationSystem
             
             return points;
         }
-
+        
+        
         private bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
         {
             bool isInside = false;

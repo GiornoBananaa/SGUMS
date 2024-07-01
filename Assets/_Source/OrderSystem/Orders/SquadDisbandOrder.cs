@@ -3,6 +3,7 @@ using System.Linq;
 using SelectionSystem;
 using UnitGroupingSystem;
 using UnitSystem;
+using UnityEngine;
 
 namespace OrderSystem
 {
@@ -12,7 +13,7 @@ namespace OrderSystem
         private readonly GroupSelection _groupSelection;
         
         public Orders OrderType => Orders.SquadDisband;
-        public bool Activated => _groupSelection.Selected.Any();
+        public bool Activated => _groupSelection.SelectedCount > 0;
 
         public SquadDisbandOrder(GroupSelection groupSelection, UnitGrouper unitGrouper)
         {
@@ -26,6 +27,7 @@ namespace OrderSystem
             {
                 _unitGrouper.DisbandSquad(group);
             }
+            _groupSelection.DeselectAll();
         }
     }
 }

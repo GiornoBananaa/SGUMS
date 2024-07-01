@@ -16,8 +16,12 @@ namespace SelectionSystem
         public Action<Unit> OnUnitSelect;
         public Action<Unit> OnUnitDeselect;
         
+        public bool MultiSelection { get; set; }
+        
         public void Select(IEnumerable<Unit> units)
         {
+            if(!MultiSelection)
+                DeselectAll();
             _selectionProcessesCount += 1;
             foreach (var unit in units)
             {
@@ -29,6 +33,8 @@ namespace SelectionSystem
         
         public void Select(Unit unit)
         {
+            if(!MultiSelection && _selectionProcessesCount == 0)
+                DeselectAll();
             _selectedUnits.Add(unit);
             EnableSelectionView(unit);
             OnUnitSelect?.Invoke(unit);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnitGroupingSystem;
+using UnityEngine;
 
 namespace SelectionSystem
 {
@@ -11,9 +12,11 @@ namespace SelectionSystem
 
         public IEnumerable<Group> Selected => _selectedGroups;
         public int SelectedCount => _selectedGroups.Count;
-        
+
         public Action<Group> OnGroupSelect;
         public Action<Group> OnGroupDeselect;
+
+        public bool MultiSelection { get; set; }
         
         public GroupSelection(UnitSelection unitSelection)
         {
@@ -22,6 +25,8 @@ namespace SelectionSystem
         
         public void Select(Group group)
         {
+            if(!MultiSelection)
+                DeselectAll();
             _selectedGroups.Add(group);
             _unitSelection.Select(group.Units);
             OnGroupSelect?.Invoke(group);
