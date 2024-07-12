@@ -1,16 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnitFormationSystem;
 using UnitSystem;
 using UnitSystem.MovementSystem;
 using UnityEngine;
 
 namespace UnitGroupingSystem
 {
-    public class Group
+    public class Crowd
     {
         public HashSet<Unit> Units;
         public Path Path;
-
+        public Formation Formation;
+        public Vector2 Offset;
+        
+        public Crowd() => Units = new();
+        
+        public Crowd(IEnumerable<Unit> units)
+        {
+            Units = new();
+            foreach (var unit in units)
+            {
+                Units.Add(unit);
+                unit.UnitCrowd = this;
+            }
+        }
+    }
+    
+    public class Group : Crowd
+    {
+        public Quaternion Rotation;
+        public bool Rotatable;
+        
         public Vector3 GroupCenter
         {
             get
@@ -29,13 +50,6 @@ namespace UnitGroupingSystem
 
         public Action OnDisband;
         
-        public Group() => Units = new();
-        
-        public Group(IEnumerable<Unit> units)
-        {
-            Units = new HashSet<Unit>(units);
-        }
-
         public void Disband()
         {
             Units.Clear();

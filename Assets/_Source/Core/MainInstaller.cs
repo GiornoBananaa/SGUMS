@@ -2,6 +2,7 @@ using InputSystem;
 using OrderSystem;
 using SelectionSystem;
 using SelectionSystem.AreaSelectionSystem;
+using UnitCombatSystem;
 using UnitFormationSystem;
 using UnitGroupingSystem;
 using UnitSystem;
@@ -51,6 +52,9 @@ namespace Core
             Container.Bind<PathContainer>().AsSingle();
             Container.Bind<FormationSetter>().AsSingle();
             Container.Bind<FormationDrawer>().AsSingle();
+            Container.Bind<GroupPlacer>().AsSingle();
+            //Combat
+            Container.Bind<EnemyDetectionUpdater>().AsSingle();
             //Grouping
             Container.Bind<GroupEmblemFactory>().AsSingle().WithArguments(_groupEmblemPrefab, _groupEmblemParent);
             Container.Bind<UnitGroupContainer>().AsSingle();

@@ -1,57 +1,83 @@
 using System.Collections.Generic;
-using UnitFormationSystem;
 using UnityEngine;
 using Zenject;
 
 public class FormationGizmozView : MonoBehaviour
 {
-    private FormationSetter _formationSetter;
-
-    private List<List<Vector2>> _formations;
+    private static List<List<Vector2>> _bounds;
+    private static List<List<Vector2>> _positions;
     
     [Inject]
-    public void Construct(FormationSetter formationSetter)
+    public void Construct()
     {
-        _formationSetter = formationSetter;
-        _formationSetter.OnFormation += AddFormation;
-        _formations = new List<List<Vector2>>();
+        _bounds = new List<List<Vector2>>();
+        _positions = new List<List<Vector2>>();
     }
     
     private void OnDrawGizmos()
     {
-        if(_formations == null) return;
+        DrawBounds();
+        DrawPositions();
+    }
+    
+    private void DrawPositions()
+    {
+        if(_positions == null) return;
         Gizmos.color = Color.yellow;
-        foreach (var formation in _formations)
+        foreach (var positions in _positions)
         {
-            for (int i = 0; i < formation.Count; i++)
+            float count = 0;
+            foreach (var position in positions)
             {
-                Vector3 point = new Vector3(formation[i].x, 0.3f, formation[i].y);
+                Gizmos.DrawSphere(new Vector3(position.x, 0.3f, position.y), 0.1f);
+                Gizmos.color = Color.Lerp(Color.yellow,Color.red,count/positions.Count);
+                count++;
+            }
+        }
+    }
+    
+    private void DrawBounds()
+    {
+        if(_bounds == null) return;
+        Gizmos.color = Color.yellow;
+        foreach (var bounds in _bounds)
+        {
+            for (int i = 0; i < bounds.Count; i++)
+            {
+                Vector3 point = new Vector3(bounds[i].x, 0.3f, bounds[i].y);
                 
-                if(i != formation.Count-1)
+                if(i != bounds.Count-1)
                 {
-                    Vector3 pointNext = new Vector3(formation[i+1].x, 0.3f, formation[i+1].y);
+                    Vector3 pointNext = new Vector3(bounds[i+1].x, 0.3f, bounds[i+1].y);
                     Gizmos.DrawLine(point, pointNext);
                 }
                 else
                 {
-                    Vector3 firstPoint = new Vector3(formation[0].x, 0.3f, formation[0].y);
+                    Vector3 firstPoint = new Vector3(bounds[0].x, 0.3f, bounds[0].y);
                     Gizmos.DrawLine(point, firstPoint);
                 }
             }
         }
     }
 
-    private void AddFormation(List<Vector2> formation, float size)
+    public static void DrawPoints(List<Vector2> points, Vector2 size)
     {
-        for (int i = 0; i < formation.Count; i++)
+        List<Vector2> drawPoints = new List<Vector2>();
+        foreach (var point in points)
         {
-            formation[i] *= size;
+            drawPoints.Add(new Vector2(point.x + size.x/2, point.y + size.y/2));
         }
-        _formations.Add(formation);
+        _positions.Add(drawPoints);
     }
     
-    private void OnDestroy()
+    public static void DrawFigure(IEnumerable<Vector2> points, float size)
     {
-        _formationSetter.OnFormation -= AddFormation;
+        List<Vector2> bounds = new List<Vector2>();
+        foreach (var point in points)
+        {
+            bounds.Add(new Vector2(point.x, point.y) * size);
+        }
+        
+        _bounds.Add(bounds);
     }
 }

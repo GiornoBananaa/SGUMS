@@ -33,23 +33,23 @@ namespace UnitGroupingSystem
         public void GroupUnit(Unit unit, Group group)
         {
             group.Units.Add(unit);
-            unit.UnitGroup = group;
+            unit.UnitCrowd = group;
         }
         
         public void UngroupUnit(Unit unit)
         {
-            if(unit.UnitGroup == null) return;
-            unit.UnitGroup.Units.Remove(unit);
-            if (unit.UnitGroup.Units.Count == 0)
-                unit.UnitGroup.Disband();
-            unit.UnitGroup = null;
+            if(unit.UnitCrowd == null) return;
+            unit.UnitCrowd.Units.Remove(unit);
+            if (unit.UnitCrowd.Units.Count == 0 && unit.UnitCrowd is Group group)
+                group.Disband();
+            unit.UnitCrowd = null;
         }
         
         public void DisbandSquad(Group group)
         {
             foreach (var unit in group.Units)
             {
-                unit.UnitGroup = null;
+                unit.UnitCrowd = null;
             }
             group.Disband();
         }

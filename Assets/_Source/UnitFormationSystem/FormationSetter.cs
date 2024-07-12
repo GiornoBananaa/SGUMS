@@ -1,42 +1,37 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using SelectionSystem;
-using UnitSystem;
+using UnitGroupingSystem;
 using UnityEngine;
 
 namespace UnitFormationSystem
 {
     public class FormationSetter
     {
-        private UnitSelection _unitSelection;
-
-        public Action<List<Vector2>, float> OnFormation;
-        private float _formationSize;
+        public Action<Formation> OnFormation;
+        private const float UNIT_SPACING = 1.5f;
         
-        public FormationSetter(UnitSelection unitSelection)
+        public void EnterFormation(Vector2[] formationBounds, Crowd crowd)
         {
-            _unitSelection = unitSelection;
-        }
-        
-        public void EnterFormation(Vector2[] formation, IEnumerable<Unit> units = null)
-        {
-            units ??= _unitSelection.Selected;
-            List<Vector2> points = DistributePoints(formation, units.Count());
+            Formation formation = DistributePoints(formationBounds, crowd.Units.Count);
+            
+            if(formation == null) return;
+            
             int pointIndex = 0;
-            foreach (var unit in units)
+            crowd.Formation = formation;
+            foreach (var unit in crowd.Units)
             {
-                unit.PathOffset = points[pointIndex];
+                unit.PathOffset = formation.Positions[pointIndex];
                 pointIndex++;
             }
-            OnFormation?.Invoke(formation.ToList(), _formationSize);
+            
+            OnFormation?.Invoke(formation);
         }
         
-        public List<Vector2> DistributePoints(Vector2[] boundaryPoints, int numPoints, float unitsSpacing = 1.5f)
+        public Formation DistributePoints(Vector2[] boundaryPoints, int numPoints)
         {
-            float width = 0;
-            float height = 0;
-
+            float width = boundaryPoints[0].x;
+            float height = boundaryPoints[0].y;
+            
             float lowestXPoint = boundaryPoints[0].x;
             float lowestYPoint = boundaryPoints[0].y;
             
@@ -54,80 +49,126 @@ namespace UnitFormationSystem
             
             width -= lowestXPoint;
             height -= lowestYPoint;
+            
+            if (width == 0 || height == 0) return null;
 
-            float maxValue = width < height ? height : width;
+            float diagonalLength = Mathf.Sqrt(Mathf.Pow(width,2) + Mathf.Pow(height,2));
+            
+            width /= diagonalLength;
+            height /= diagonalLength;
             
             for (int i = 0; i < boundaryPoints.Length; i++)
             {
-                boundaryPoints[i] = new Vector2((boundaryPoints[i].x - lowestXPoint) / maxValue, (boundaryPoints[i].y - lowestYPoint) / maxValue);
+                boundaryPoints[i] = new Vector2(boundaryPoints[i].x - lowestXPoint, boundaryPoints[i].y - lowestYPoint) / diagonalLength;
             }
-
-            width /= maxValue;
-            height /= maxValue;
             
             List<Vector2> points = new List<Vector2>();
-            int cellsCount = Mathf.CeilToInt(Mathf.Sqrt(numPoints));
-            float cellSize = 0;
-            int numCellsX = 0;
-            int numCellsY = 0;
-            int bugBuff = 0;
+            float sideRatio = width / height;
+            int intersectionsY = Mathf.CeilToInt(Mathf.Sqrt(numPoints / sideRatio));
+            int intersectionsX = Mathf.CeilToInt(intersectionsY * sideRatio);
+            int loops = 0;
+            float cellSize = height / (intersectionsY - 1);
             
-            while (points.Count < numPoints && bugBuff < 200)
+            while (points.Count < numPoints && loops < 200)
             {
-                bugBuff++;
+                if(width < height && loops != 0)
+                {
+                    intersectionsY++;
+                    intersectionsX = Mathf.CeilToInt(intersectionsY * sideRatio);
+                    cellSize = height / (intersectionsY-1);
+                }
+                else if(loops != 0)
+                {
+                    intersectionsX++;
+                    intersectionsY = Mathf.CeilToInt(intersectionsX * (1 / sideRatio));
+                    cellSize = height / (intersectionsY-1);
+                }
                 points.Clear();
-                if(width < height)
+                int spiralLoop = 0;
+                foreach (var coordinates in SpiralTraversal(intersectionsX, intersectionsY))
                 {
-                    cellSize = width / cellsCount;
-                    numCellsX = cellsCount;
-                    numCellsY = (int)(height / cellSize);
-                }
-                else
-                {
-                    cellSize = height / cellsCount;
-                    numCellsX = Mathf.CeilToInt(width / cellSize);
-                    numCellsY = (int)(height / cellSize);
-                }
-                
-                for (int i = 0; i < numCellsX; i++)
-                {
-                    for (int j = 0; j < numCellsY; j++)
+                    spiralLoop++;
+                    if (spiralLoop > 200) break;
+                    (int i, int j) = coordinates;
+                    Vector2 point = new Vector2(i * cellSize, j * cellSize);
+                    if (IsPointInPolygon(point, boundaryPoints))
                     {
-                        Vector2 point = new Vector2(i * cellSize, j * cellSize);
-                        if (IsPointInPolygon(point, boundaryPoints))
-                        {
-                            points.Add(point);
-                        }
+                        points.Add(point * (UNIT_SPACING / cellSize) - new Vector2((intersectionsX - 1) / 2f, (intersectionsY - 1) / 2f) * UNIT_SPACING);
                     }
-                }
-                
-                cellsCount++;
-            }
 
-            float sizeModifier = unitsSpacing / cellSize;
-            _formationSize = sizeModifier;
-            
-            for (int i = 0; i < points.Count; i++)
-            {
-                points[i] = (points[i] - new Vector2(width/2, height/2)) * sizeModifier;
+                    if (points.Count >= numPoints)
+                        break;
+                }
+                loops++;
             }
-            
-            return points;
+            FormationGizmozView.DrawFigure(boundaryPoints, intersectionsX * UNIT_SPACING);
+            FormationGizmozView.DrawPoints(points, new Vector2(intersectionsX - 1, intersectionsY - 1) * UNIT_SPACING);
+            return new Formation(points, boundaryPoints, new Vector2(intersectionsX - 1, intersectionsY - 1) * UNIT_SPACING);
         }
         
         
         private bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
         {
+            int numPoints = polygon.Length;
             bool isInside = false;
-            for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
+            
+            for (int i = 0, j = numPoints - 1; i < numPoints; j = i++)
             {
-                if (((polygon[i].y > point.y) != (polygon[j].y > point.y)) &&
-                    (point.x < (polygon[j].x - polygon[i].x) * (point.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x))
+                // Check if the point is on the edge of the polygon
+                if ((polygon[i].x - point.x) * (polygon[j].y - point.y) - (polygon[j].x - point.x) * (polygon[i].y - point.y) == 0 &&
+                    (polygon[i].x - point.x) * (polygon[j].x - point.x) <= 0 &&
+                    (polygon[i].y - point.y) * (polygon[j].y - point.y) <= 0)
                 {
-                    isInside = !isInside;
+                    return true;
+                }
+
+                // Check if the point is inside the polygon
+                if ((polygon[i].y <= point.y && point.y < polygon[j].y) || (polygon[j].y <= point.y && point.y < polygon[i].y))
+                {
+                    if (point.x < (polygon[j].x - polygon[i].x) * (point.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)
+                    {
+                        isInside = !isInside;
+                    }
                 }
             }
+            
             return isInside;
+        }
+        
+        public static IEnumerable<(int,int)> SpiralTraversal(int width, int height)
+        {
+            int rows = width;
+            int cols = height;
+            int centerRow = rows / 2;
+            int centerCol = cols / 2;
+            int radius = Math.Min((rows + 1) / 2, (cols + 1) / 2) ;
+            
+            yield return (centerRow,centerCol);
+            for (int r = 0; r <= radius; r++)
+            {
+                
+                // Traverse top row
+                for (int i = centerCol - r + 1; i <= centerCol + r; i++)
+                    yield return (centerRow - r, i);
+                
+                // Traverse right column
+                for (int i = centerRow - r + 1; i <= centerRow + r; i++)
+                    yield return (i, centerCol + r);
+                
+                // Traverse bottom row (if there are any elements left)
+                if (centerRow + r <= rows - 1)
+                {
+                    for (int i = centerCol + r - 1; i >= centerCol - r; i--)
+                        yield return (centerRow + r, i);
+                }
+                
+                // Traverse left column (if there are any elements left)
+                if (centerCol - r >= 0)
+                {
+                    for (int i = centerRow + r - 1; i > centerRow - r-1; i--)
+                        yield return (i, centerCol - r);
+                }
+            }
         }
     }
 }

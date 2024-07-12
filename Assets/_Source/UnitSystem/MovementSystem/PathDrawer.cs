@@ -12,7 +12,7 @@ namespace UnitSystem.MovementSystem
     public class PathDrawer : IDisposable
     {
         private const float LINE_HEIGHT = 0.2f;
-        private const float MIN_POINT_DISTANCE = 0.2f;
+        private const float MIN_POINT_DISTANCE = 0.5f;
         private readonly Dictionary<Path, PathView> _pathsViews = new();
         private readonly ObjectPool<PathView> _pathViewsPool;
         private readonly Material _lineMaterial;
