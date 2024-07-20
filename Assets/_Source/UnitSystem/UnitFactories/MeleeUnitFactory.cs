@@ -1,0 +1,34 @@
+﻿using SelectionSystem;
+using TeamSystem;
+using UnitCombatSystem;
+using UnitSystem.MovementSystem;
+using UnityEngine;
+using Zenject;
+
+namespace UnitSystem.UnitFactories
+{
+    public class MeleeUnitFactory : UnitFactory
+    {
+        private EnemyDetectionUpdater _enemyDetectionUpdater;
+        private LayerMask _unitsLayers;
+        private IUnitAttack _attack;
+        
+        protected override UnitType UnitType => UnitType.Melee;
+        
+        public MeleeUnitFactory(EnemyDetectionUpdater enemyDetectionUpdater, EnemyDetectionDataSO detectionData, MeleeAttack meleeAttack,
+            DiContainer container,UnitSelection unitSelection, UnitContainer unitContainer, TeamsDataSO teamsData, UnitsDataSO unitsDataSO, UnitMover unitMover) 
+            : base(container, unitContainer, unitSelection, unitMover, teamsData, unitsDataSO)
+        {
+            _attack = meleeAttack;
+            _enemyDetectionUpdater = enemyDetectionUpdater;
+            _unitsLayers = detectionData.UnitsLayers;
+        }
+
+        protected override (IEnemyDetector, IUnitAttack) CreateCombatComponent(Unit unit)
+        {
+            return (new MeleeEnemyDetector(_enemyDetectionUpdater, unit, _unitsLayers), _attack);
+        }
+
+        protected override void CreateOtherComponents(Unit unit) { }
+    }
+}

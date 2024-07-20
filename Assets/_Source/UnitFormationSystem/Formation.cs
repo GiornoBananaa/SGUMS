@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnitGroupingSystem;
-using UnitSystem;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnitFormationSystem
@@ -18,15 +15,5 @@ namespace UnitFormationSystem
             Bounds = bounds;
             Size = size;
         }
-    }
-
-    public class GroupRotator
-    {
-        
-        public void SetPivotUnit(Group formation, Unit pivotUnit)
-        {
-            
-        }
-        
     }
 }

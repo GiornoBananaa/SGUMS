@@ -30,6 +30,7 @@ namespace UnitSystem.MovementSystem
         public void StartPathCreation()
         {
             _formingPath = new Path();
+            _formingPath.OnDestroy += DestroyPath;
             _pathContainer.AllPaths.Add(_formingPath);
         }
         
@@ -57,10 +58,10 @@ namespace UnitSystem.MovementSystem
 
         public void DestroyPath(Path path)
         {
-            path.OnDestroy?.Invoke(path);
-            path.Units.Clear();
+            path.OnDestroy -= DestroyPath;
             _pathDrawer.DestroyPath(path);
             _pathContainer.AllPaths.Remove(path);
+            path.DestroyPath();
         }
     }
 }

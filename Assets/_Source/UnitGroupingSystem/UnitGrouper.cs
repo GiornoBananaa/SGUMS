@@ -52,6 +52,7 @@ namespace UnitGroupingSystem
                 unit.UnitCrowd = null;
             }
             group.Disband();
+            _unitGroupContainer.Remove(group);
         }
     }
 }

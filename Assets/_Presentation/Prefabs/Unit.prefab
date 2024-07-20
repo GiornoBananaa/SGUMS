@@ -50,7 +50,7 @@ Projector:
   m_Material: {fileID: 2100000, guid: b9c362ffaf5342d46b7d8a6d2b8c3f68, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2
-    m_Bits: 119
+    m_Bits: 439
 --- !u!1 &5053624000765739524
 GameObject:
   m_ObjectHideFlags: 0
@@ -65,7 +65,7 @@ GameObject:
   - component: {fileID: 1593852973594364964}
   - component: {fileID: 8406355986928557407}
   - component: {fileID: 6494448677323941413}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Unit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

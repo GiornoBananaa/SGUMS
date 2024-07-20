@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SelectionSystem;
 using UnitFormationSystem;
 using UnitGroupingSystem;
+using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -13,20 +14,22 @@ namespace UnitSystem.MovementSystem
         private readonly UnitSelection _unitSelection;
         private readonly PathCreator _pathCreator;
         private readonly FormationSetter _formationSetter;
-        private readonly GroupPlacer _groupPlacer;
-        
-        public UnitMover(UnitSelection unitSelection, PathCreator pathCreator, FormationSetter formationSetter, GroupPlacer groupPlacer)
+        private readonly FormationPlacer _formationPlacer;
+        private readonly GroupSpeedEqualizer _groupSpeedEqualizer;
+
+        public UnitMover(UnitSelection unitSelection, PathCreator pathCreator, FormationSetter formationSetter,
+            FormationPlacer formationPlacer, GroupSpeedEqualizer groupSpeedEqualizer)
         {
             _unitSelection = unitSelection;
             _pathCreator = pathCreator;
             _formationSetter = formationSetter;
-            _groupPlacer = groupPlacer;
+            _formationPlacer = formationPlacer;
+            _groupSpeedEqualizer = groupSpeedEqualizer;
             _pathCreator.OnPathCreate += MoveOnPath;
         }
         
         private void MoveOnPath(Path path)
         {
-            path.Units = new List<Unit>();
             path.OnDestroy += StopOnPath;
             
             List<Unit> unitsWithoutGroup = new List<Unit>();
@@ -42,6 +45,14 @@ namespace UnitSystem.MovementSystem
                 {
                     unit.UnitCrowd.Offset = Vector2.zero;
                     selectedCrowds.Add(unit.UnitCrowd);
+                    
+                    if(unit.UnitCrowd.Formation == null)
+                    {
+                        _formationSetter.EnterFormation(new[]
+                        {
+                            new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1)
+                        }, unit.UnitCrowd);
+                    }
                 }
             }
             
@@ -55,23 +66,35 @@ namespace UnitSystem.MovementSystem
                 selectedCrowds.Add(unitsWithoutGroup[0].UnitCrowd);
             }
             
-            _groupPlacer.PlaceFormations(selectedCrowds);
-            
-            foreach (var unit in _unitSelection.Selected)
+            _formationPlacer.PlaceFormations(selectedCrowds);
+            foreach (var crowd in selectedCrowds)
             {
-                if(unit.Path != null)
+                foreach (var unit in crowd.Units)
                 {
-                    unit.Path.Units.Remove(unit);
-                    if (unit.Path.Units.Count == 0)
-                    {
-                        _pathCreator.DestroyPath(unit.Path);
-                    }
+                    PutOnPath(unit,path);
                 }
-                unit.Path = path;
-                path.Units.Add(unit);
-                unit.PathPointIndex = -1;
-                UpdateUnitPath(unit);
             }
+
+            foreach (var unit in unitsWithoutGroup)
+            {
+                PutOnPath(unit,path);
+            }
+        }
+
+        private void PutOnPath(Unit unit, Path path)
+        {
+            if(unit.Path != null)
+            {
+                unit.Path.RemoveUnit(unit);
+                if (unit.Path.UnitsCount == 0)
+                {
+                    _pathCreator.DestroyPath(unit.Path);
+                }
+            }
+            unit.Path = path;
+            path.AddUnit(unit);
+            unit.PathPointIndex = 0;
+            UpdateUnitPath(unit);
         }
         
         private void StopOnPath(Path path)
@@ -87,29 +110,58 @@ namespace UnitSystem.MovementSystem
         private void UpdateUnitPath(Unit unit)
         {
             unit.OnDestinationReached -= UpdateUnitPath;
-            unit.PathPointIndex += 1;
-            if ( unit.PathPointIndex >= unit.Path.PathPoints.Count)
+            if(unit.Health.IsDead) return;
+            Vector3 destination;
+            if (unit.Target != null)
             {
-                unit.Path.Units.Remove(unit);
-                if (unit.Path.Units.Count == 0)
-                {
-                    _pathCreator.DestroyPath(unit.Path);
-                }
-                unit.Path = null;
-                
+                destination = unit.Target.transform.position + (Vector3)unit.TargetOffset;
+            }
+            else if(unit.Path == null)
+            {
                 return;
             }
+            else
+            {
+                if (unit.PathPointIndex >= unit.Path.PathPoints.Count)
+                {
+                    unit.Path.RemoveUnit(unit);
+                    if (unit.Path.UnitsCount == 0)
+                    {
+                        _pathCreator.DestroyPath(unit.Path);
+                    }
 
-            var offset = new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y) + new Vector3(unit.UnitCrowd.Offset.x, 0, unit.UnitCrowd.Offset.y);
-            /*
-            float offsetAngle = Vector3.SignedAngle(Vector3.forward, offset, Vector3.up);
-            float rotationAngle = offsetAngle - Vector3.SignedAngle(Vector3.forward, unit.Path.PathPoints[unit.PathPointIndex] - unit.LastPathPoint, Vector3.up);
-            offset = Quaternion.Euler(0, rotationAngle, 0) * offset;
-            */
-            unit.NavMeshAgent.SetDestination(unit.Path.PathPoints[unit.PathPointIndex] + offset);
+                    unit.Path = null;
+                    return;
+                }
+
+                var offset = new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y) +
+                             new Vector3(unit.UnitCrowd.Offset.x, 0, unit.UnitCrowd.Offset.y);
+                
+                if (unit.UnitCrowd is Group { Rotatable: true } group && unit != group.PivotUnit)
+                {
+                    Vector3 pivot = group.PivotUnit.Path != null ? 
+                        group.PivotUnit.Path.PathPoints[group.PivotUnit.PathPointIndex - 1] 
+                        : group.PivotUnit.LastPathPoint;
+                    
+                    group.Rotation = Quaternion.Euler(0, Quaternion.LookRotation(
+                        pivot - group.PivotUnit.transform.position).eulerAngles.y, 0);
+                    offset = group.Rotation * offset;
+                }
+                
+                destination = unit.Path.PathPoints[unit.PathPointIndex] + offset;
+                unit.LastPathPoint = unit.Path.PathPoints[unit.PathPointIndex];
+                unit.PathPointIndex += 1;
+            }
+
+            unit.NavMeshAgent.speed = unit.Stats.Speed;
+            unit.NavMeshAgent.SetDestination(destination);
             unit.OnDestinationReached += UpdateUnitPath;
             unit.StartNavigationTracking();
-            unit.LastPathPoint = unit.Path.PathPoints[unit.PathPointIndex];
+            
+            if (unit.UnitCrowd is Group group2)
+            {
+                group2.AddUnitStartedMove(unit);
+            }
         }
         
         public void MoveToPoint(Vector3 point)
@@ -122,14 +174,28 @@ namespace UnitSystem.MovementSystem
             }
         }
         
-        public void MoveToPoint(Unit unit, Vector3 point)
-        {
-            unit.NavMeshAgent.SetDestination(point);
-        }
-        
         public void Dispose()
         {
             _pathCreator.OnPathCreate -= MoveOnPath;
+        }
+
+        public void FollowTarget(Unit unit, Transform transform, float range)
+        {
+            unit.CombatMode = true;
+            unit.Target = transform;
+            unit.TargetOffset = (unit.transform.position - transform.position).normalized * range;
+            UpdateUnitPath(unit);
+        }
+        
+        public void UnFollowTarget(Unit unit)
+        {
+            bool updated = unit.Target != null;
+            unit.Target = null;
+            if(updated)
+            {
+                unit.CombatMode = false;
+                UpdateUnitPath(unit);
+            }
         }
     }
 }

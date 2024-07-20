@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnitSystem;
 
 namespace SelectionSystem
@@ -42,6 +43,11 @@ namespace SelectionSystem
                 OnSelectionChanged?.Invoke();
         }
         
+        public bool IsSelected(Unit unit)
+        {
+            return _selectedUnits.Contains(unit);
+        }
+        
         public void Deselect(Unit unit)
         {
             _selectedUnits.Remove(unit);
@@ -53,8 +59,13 @@ namespace SelectionSystem
         
         public void DeselectAll()
         {
-            foreach (var selectable in _selectedUnits)
+            foreach (var selectable in _selectedUnits.ToList())
             {
+                if (selectable == null)
+                {
+                    _selectedUnits.Remove(selectable);
+                    continue;
+                }
                 DisableSelectionView(selectable);
                 OnUnitDeselect?.Invoke(selectable);
             }

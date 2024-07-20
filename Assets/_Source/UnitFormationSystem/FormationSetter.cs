@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnitGroupingSystem;
 using UnityEngine;
 
@@ -18,6 +19,10 @@ namespace UnitFormationSystem
             
             int pointIndex = 0;
             crowd.Formation = formation;
+            if (crowd is Group group)
+            {
+                group.PivotUnit = crowd.Units.First();
+            }
             foreach (var unit in crowd.Units)
             {
                 unit.PathOffset = formation.Positions[pointIndex];
