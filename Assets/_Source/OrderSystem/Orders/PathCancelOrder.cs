@@ -1,12 +1,21 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using SelectionSystem;
+using UnitGroupingSystem;
+using UnitSystem;
 using UnitSystem.MovementSystem;
 
 namespace OrderSystem
 {
     public class PathCancelOrder : IOrder
     {
-        private readonly PathContainer _pathContainer;
-        private readonly PathCreator _pathCreator;
+        //private readonly UnitSelection _unitSelection;
+        //private readonly GroupSelection _groupSelection;
+        private readonly IEnumerable<ISelection<IMoving>> _selections;
+        private readonly Dictionary<Type,IPathMover<IMoving>> _movers;
+        private readonly GroupMover _groupMover;
+        //private readonly UnitMover _unitMover;
         private readonly PathDrawer _pathDrawer;
 
         public Orders OrderType => Orders.PathCancel;
@@ -14,36 +23,45 @@ namespace OrderSystem
         {
             get
             {
-                foreach (var path in _pathContainer.AllPaths)
+                /*
+                return _groupSelection.Selected.Any(group => group.Path != null) 
+                       || _unitSelection.Selected.Any(unit => unit.UnitCrowd is not Group && unit.Path != null);*/
+                foreach (var selection in _selections)
                 {
-                    if (_pathDrawer.PathIsShowed(path))
+                    foreach (var selected in selection.Selected)
                     {
-                        return true;
+                        if (selected.Path != null)
+                        {
+                            return true;
+                        }
                     }
                 }
                 return false;
             }
         }
 
-        public PathCancelOrder(PathCreator pathCreator, PathContainer pathContainer, PathDrawer pathDrawer)
+        public PathCancelOrder(IEnumerable<ISelection<IMoving>> selections, IEnumerable<IPathMover<IMoving>> movers)
         {
-            _pathContainer = pathContainer;
-            _pathCreator = pathCreator;
-            _pathDrawer = pathDrawer;
+            _selections = selections;
+            _movers = new Dictionary<Type, IPathMover<IMoving>>();
+            foreach (var mover in movers)
+            {
+                _movers.Add(mover.GetType().GetGenericArguments()[0],mover);
+            }
+            //_unitSelection = unitSelection;
+            //_groupSelection = groupSelection;
         }
         
         public void Execute()
         {
-            for (int i = 0; i < _pathContainer.AllPaths.Count;)
+            foreach (var selection in _selections)
             {
-                Path path = _pathContainer.AllPaths[i];
-                if (_pathDrawer.PathIsShowed(path))
+                foreach (var selected in selection.Selected)
                 {
-                    _pathCreator.DestroyPath(path);
-                }
-                else
-                {
-                    i++;
+                    if (selected.Path != null)
+                    {
+                        _movers[selected.GetType()].StopOnPath(selected);
+                    }
                 }
             }
         }

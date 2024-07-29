@@ -1,6 +1,7 @@
 ﻿using SelectionSystem;
 using TeamSystem;
 using UnitCombatSystem;
+using UnitGroupingSystem;
 using UnitSystem.MovementSystem;
 using UnityEngine;
 using Zenject;
@@ -16,8 +17,8 @@ namespace UnitSystem.UnitFactories
         protected override UnitType UnitType => UnitType.Melee;
         
         public MeleeUnitFactory(EnemyDetectionUpdater enemyDetectionUpdater, EnemyDetectionDataSO detectionData, MeleeAttack meleeAttack,
-            DiContainer container,UnitSelection unitSelection, UnitContainer unitContainer, TeamsDataSO teamsData, UnitsDataSO unitsDataSO, UnitMover unitMover) 
-            : base(container, unitContainer, unitSelection, unitMover, teamsData, unitsDataSO)
+            DiContainer container, UnitContainer unitContainer, UnitSelection unitSelection, UnitMover unitMover, TeamsDataSO teamsData, UnitGrouper unitGrouper, UnitsDataSO unitsDataSO) 
+            : base(container, unitContainer, unitSelection, unitMover, teamsData, unitGrouper,unitsDataSO)
         {
             _attack = meleeAttack;
             _enemyDetectionUpdater = enemyDetectionUpdater;

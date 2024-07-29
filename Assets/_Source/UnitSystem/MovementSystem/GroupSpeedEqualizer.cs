@@ -1,18 +1,34 @@
 ﻿using System.Linq;
+using Core;
 using UnitGroupingSystem;
+using UnitSystem.UnitModifierSystem;
 using UnityEngine;
 
 namespace UnitSystem.MovementSystem
 {
-    public class GroupSpeedEqualizer
+    public class GroupSpeedEqualizer : IUpdatable
     {
+        private readonly UnitGroupContainer _unitGroupContainer;
+        private readonly UpdateTimer _updateTimer;
         private UnitStatsModifier _speedModifier;
-
-        public GroupSpeedEqualizer(UnitGroupContainer groupContainer)
+        
+        public GroupSpeedEqualizer(UnitGroupContainer groupContainer, ServiceUpdater updater, 
+            UnitGroupContainer unitGroupContainer)
         {
             _speedModifier = new UnitStatsModifier(new ModifiableUnitStats(0,0,0,0,0));
             groupContainer.OnGroupAdd += AddGroup;
             groupContainer.OnGroupRemove += RemoveGroup;
+            
+            updater.Subscribe(this);
+            _unitGroupContainer = unitGroupContainer;
+        }
+        
+        public void Update()
+        {
+            foreach (var group in _unitGroupContainer.PlayerGroups)
+            {
+                EqualizeSpeed(group);
+            }
         }
         
         private void EqualizeSpeed(Group group)
@@ -21,25 +37,24 @@ namespace UnitSystem.MovementSystem
             
             foreach (var unit in group.Units)
             {
-                float distance = Vector3.Distance(unit.NavMeshAgent.destination, unit.NavMeshAgent.transform.position);
-                Debug.Log(unit.name + " - " + unit.NavMeshAgent.destination + " ~ " + unit.NavMeshAgent.transform.position + " = " + distance);
+                if(group.LaggingUnits.Contains(unit)) continue;
+                var navMeshDistance = unit.NavMeshAgent.remainingDistance;
+                float distance = navMeshDistance != 0 && !float.IsPositiveInfinity(navMeshDistance)
+                    ? unit.NavMeshAgent.remainingDistance
+                    : Vector3.Distance(unit.NavMeshAgent.destination, unit.NavMeshAgent.transform.position);
                 if (maxTime < distance / unit.Stats.BaseSpeed)
                     maxTime = distance / unit.Stats.BaseSpeed;
             }
+            
             foreach (var unit in group.Units)
             {
                 _speedModifier.RemoveModifier(unit);
-                if(maxTime == 0) continue;
-                
-                float distance = Vector3.Distance(unit.NavMeshAgent.destination, unit.NavMeshAgent.transform.position);
+                float distance = unit.NavMeshAgent.remainingDistance != 0 ? unit.NavMeshAgent.remainingDistance
+                    : Vector3.Distance(unit.NavMeshAgent.destination, unit.NavMeshAgent.transform.position);
+                if(maxTime == 0 || distance == 0 || group.LaggingUnits.Contains(unit)) continue;
                 _speedModifier.StatsModifiers.SpeedModifier = distance / maxTime - unit.Stats.BaseSpeed;
                 _speedModifier.ApplyModifier(unit);
-                unit.NavMeshAgent.speed = unit.Stats.Speed;
-                Debug.Log("distance: " + distance);
-                Debug.Log("unit.Stats.Speed: " + unit.Stats.Speed);
-                Debug.Log("--------------------------");
             }
-            Debug.Log("maxTime: " + maxTime);
         }
         
         private void AddGroup(Group group)
@@ -55,6 +70,5 @@ namespace UnitSystem.MovementSystem
                 _speedModifier.RemoveModifier(unit);
             }
         }
-
     }
 }

@@ -57,7 +57,7 @@ namespace OrderSystem
             }
             var center = sum/linePositions.Length;
             
-            _unitMover.MoveToPoint(center);
+            _unitMover.MoveToPoint(_selectedGroup.Units, center);
         }
     }
 }

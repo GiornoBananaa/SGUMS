@@ -14,6 +14,7 @@ namespace UnitCombatSystem
         private readonly UnitMover _unitMover;
         private readonly Unit _unit;
         private Unit _enemy;
+        private bool _seesEnemy;
         private bool _isFighting;
         
         public UnitCombat(Unit unit, UpdateTimer attackCooldownTimer, UpdateTimer attackRangeTimer, IUnitAttack attack, 
@@ -39,14 +40,16 @@ namespace UnitCombatSystem
         
         private void AimOnEnemy(Unit enemy)
         {
-            if(_unit == null)return;
-            if (enemy == null && _enemy != null)
+            if(_unit == null) return;
+            if (enemy == null && _seesEnemy)
             {
+                _seesEnemy = false;
                 _unitMover.UnFollowTarget(_unit);
                 _attackCooldownTimer.Stop();
             }
             else if(enemy != null)
             {
+                _seesEnemy = true;
                 _unitMover.FollowTarget(_unit, enemy.transform, enemy.Radius + _unit.Radius * 2);
                 _attackCooldownTimer.SetMaxTime(_unit.Stats.AttackCooldown);
                 _attackCooldownTimer.Restart();

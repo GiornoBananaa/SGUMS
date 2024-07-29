@@ -34,11 +34,11 @@ namespace UnitSystem
     [Serializable]
     public class ModifiableUnitStats: ICloneable
     {
-        public int BaseMaxHP { get; private set; }
-        public int BaseAttack { get; private set; }
-        public float BaseSpeed { get; private set; }
-        public float BaseAttackCooldown { get; private set; }
-        public float BaseAttackRange { get; private set; }
+        [field: SerializeField] public int BaseMaxHP { get; private set; }
+        [field: SerializeField] public int BaseAttack { get; private set; }
+        [field: SerializeField] public float BaseSpeed { get; private set; }
+        [field: SerializeField] public float BaseAttackCooldown { get; private set; }
+        [field: SerializeField] public float BaseAttackRange { get; private set; }
         
         public int HPModifier { get; set; }
         public int AttackModifier { get; set; }
@@ -53,7 +53,8 @@ namespace UnitSystem
         public float AttackRange => BaseAttackRange + AttackRangeModifier;
 
         public UnitStats UnitStats => new UnitStats(MaxHP, Attack, Speed, AttackCooldown, AttackRange);
-        
+        public event Action OnSpeedChange;
+
         public ModifiableUnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange)
         {
             BaseMaxHP = maxHP;
@@ -79,6 +80,7 @@ namespace UnitSystem
             SpeedModifier += otherStats.Speed;
             AttackCooldownModifier += otherStats.AttackCooldown;
             AttackRangeModifier += otherStats.AttackRange;
+            CheckChange(otherStats);
         }
         
         public void SubtractStats(UnitStats otherStats)
@@ -88,8 +90,15 @@ namespace UnitSystem
             SpeedModifier -= otherStats.Speed;
             AttackCooldownModifier -= otherStats.AttackCooldown;
             AttackRangeModifier -= otherStats.AttackRange;
+            CheckChange(otherStats);
         }
 
+        private void CheckChange(UnitStats otherStats)
+        {
+            if(otherStats.Speed != 0)
+                OnSpeedChange?.Invoke();
+        }
+        
         public object Clone()
         {
             return new ModifiableUnitStats(UnitStats)

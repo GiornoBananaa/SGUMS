@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnitSystem;
+using UnitSystem.MovementSystem;
 using UnityEngine;
+using Unit = UnitSystem.Unit;
 
 namespace UnitGroupingSystem
 {
-    public class Group : Crowd
+    public class Group : Crowd, IMoving
     {
-        public Quaternion Rotation;
-        public Unit PivotUnit;
         public bool Rotatable = true;
+        public HashSet<Unit> LaggingUnits = new();
+        private HashSet<Unit> _unitsReachedDestination = new();
         
-        private HashSet<Unit> _unitsStartedMove = new();
         
-        public event Action<Group> OnMoveStart;
+        public Path Path { get; set; }
+        public bool UpdatePath { get; set; }
+        public int PathPointIndex { get; set; }
+        
+        public Action<Group> OnMoveStart;
+        public event Action<Group> OnDestinationReached;
         
         public Vector3 GroupCenter
         {
@@ -32,15 +37,16 @@ namespace UnitGroupingSystem
         }
 
         public Action OnDisband;
-
-        public void AddUnitStartedMove(Unit unit)
+        
+        public void AddUnitReachedDestination(Unit unit)
         {
-            _unitsStartedMove.Add(unit);
-            if(_unitsStartedMove.Count >= Units.Count)
-            {
-                _unitsStartedMove.Clear();
-                OnMoveStart?.Invoke(this);
-            }
+            unit.OnDestinationReached -= AddUnitReachedDestination;
+            _unitsReachedDestination.Add(unit);
+            if (LaggingUnits.Contains(unit))
+                LaggingUnits.Remove(unit);
+            if (_unitsReachedDestination.Count < Units.Count - LaggingUnits.Count) return;
+            _unitsReachedDestination.Clear();
+            OnDestinationReached?.Invoke(this);
         }
         
         public void Disband()

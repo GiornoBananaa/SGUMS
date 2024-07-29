@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnitFormationSystem;
 using UnitSystem;
-using UnitSystem.MovementSystem;
 using UnityEngine;
 
 namespace UnitGroupingSystem
@@ -9,7 +8,6 @@ namespace UnitGroupingSystem
     public class Crowd
     {
         public HashSet<Unit> Units;
-        public Path Path;
         public Formation Formation;
         public Vector2 Offset;
         

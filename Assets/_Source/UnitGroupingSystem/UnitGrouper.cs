@@ -40,8 +40,13 @@ namespace UnitGroupingSystem
         {
             if(unit.UnitCrowd == null) return;
             unit.UnitCrowd.Units.Remove(unit);
-            if (unit.UnitCrowd.Units.Count == 0 && unit.UnitCrowd is Group group)
-                group.Disband();
+            if(unit.UnitCrowd is Group group)
+            {
+                if(group.LaggingUnits.Contains(unit))
+                    group.LaggingUnits.Remove(unit);
+                if (group.Units.Count == 0)
+                    group.Disband();
+            }
             unit.UnitCrowd = null;
         }
         

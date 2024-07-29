@@ -4,12 +4,13 @@ using SelectionSystem;
 using TeamSystem;
 using UnitGroupingSystem;
 using UnitSystem.MovementSystem;
+using UnitSystem.UnitModifierSystem;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace UnitSystem
 {
-    public class Unit : MonoBehaviour, ISelectable
+    public class Unit : MonoBehaviour, ISelectable, IMoving
     {
         [field: SerializeField] public Projector SelectionProjector { get; private set; }
         [field: SerializeField] public NavMeshAgent NavMeshAgent { get; private set; }
@@ -20,15 +21,16 @@ namespace UnitSystem
 
         public Dictionary<IUnitModifier, UnitStats> Modifiers { get; private set; } = new();
         public Health Health { get; private set; }
-        public ModifiableUnitStats Stats { get; set; }
+        public ModifiableUnitStats Stats { get; private set; }
         public Crowd UnitCrowd { get; set; }
         public Path Path { get; set; }
         public Transform Target { get; set; }
         public Vector2 TargetOffset { get; set; }
-        public TeamColor TeamColor { get; set; }
         public Vector2 PathOffset { get; set; }
-        public Vector3 LastPathPoint { get; set; }
+        public TeamColor TeamColor { get; set; }
         public int PathPointIndex { get; set; }
+        public bool IsMoving { get; private set; }
+        public int TerrainUnderUnit { get; set; }
         public bool CombatMode
         {
             get => _combatMode;
@@ -37,28 +39,25 @@ namespace UnitSystem
                 _combatMode = value;
                 NavMeshAgent.obstacleAvoidanceType = value ? 
                     ObstacleAvoidanceType.MedQualityObstacleAvoidance
-                    :ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+                    :ObstacleAvoidanceType.NoObstacleAvoidance;
             }
         }
         
+
         public event Action<Unit> OnDestinationReached;
+        public event Action<Unit> OnPathEnd;
         
         public void Construct(Health health, TeamColor teamColor, ModifiableUnitStats stats)
         {
             Health = health;
             Stats = stats;
             TeamColor = teamColor;
+            Stats.OnSpeedChange += OnSpeedChanged;
         }
         
         private void Awake()
         {
-            LastPathPoint = transform.position;
             CombatMode = false;
-        }
-        
-        public void StartNavigationTracking()
-        {
-            _trackNavigation = true;
         }
         
         private void Update()
@@ -69,12 +68,27 @@ namespace UnitSystem
             {
                 EndNavigationTracking();
                 OnDestinationReached?.Invoke(this);
+                if(Path == null || PathPointIndex >= Path.PathPoints.Count)
+                    OnPathEnd?.Invoke(this);
             }
         }
         
-        private void EndNavigationTracking()
+        public void StartNavigationTracking()
+        {
+            _trackNavigation = true;
+            IsMoving = true;
+        }
+        
+        public void EndNavigationTracking()
         {
             _trackNavigation = false;
+            IsMoving = false;
         }
+        
+        private void OnSpeedChanged()
+        {
+            NavMeshAgent.speed = Stats.Speed;
+        }
+        
     }
 }

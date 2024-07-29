@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SelectionSystem;
 using UnitGroupingSystem;
 using UnityEngine;
@@ -11,8 +10,10 @@ namespace UnitSystem.MovementSystem
 {
     public class PathDrawer : IDisposable
     {
+        //TODO: make the distance between the points depend on screen positions
+        
         private const float LINE_HEIGHT = 0.2f;
-        private const float MIN_POINT_DISTANCE = 0.5f;
+        private const float MIN_POINT_DISTANCE = 1;
         private readonly Dictionary<Path, PathView> _pathsViews = new();
         private readonly ObjectPool<PathView> _pathViewsPool;
         private readonly Material _lineMaterial;
@@ -22,7 +23,7 @@ namespace UnitSystem.MovementSystem
         private readonly GroupSelection _groupSelection;
         private PathView _currentPathView;
         private Vector3 _lastPoint;
-
+        
         [Inject]
         public PathDrawer(PathDataSO pathDataSO, UnitSelection unitSelection, GroupSelection groupSelection)
         {

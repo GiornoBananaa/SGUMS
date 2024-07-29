@@ -9,23 +9,31 @@ namespace UnitSystem.MovementSystem
         public List<Vector3> PathPoints = new();
         private List<Unit> _units = new();
         
-        public IEnumerable<Unit> Units => _units;
-        public int UnitsCount => _units.Count;
-        
         public event Action<Path> OnDestroy;
         
         public void RemoveUnit(Unit unit)
         {
             _units.Remove(unit);
+            if (unit.Path == this)
+                unit.Path = null;
             if(_units.Count == 0)
             {
                 DestroyPath();
             }
         }
-
+        
+        public void RemoveUnits(IEnumerable<Unit> units)
+        {
+            foreach (var unit in units)
+            {
+                RemoveUnit(unit);
+            }
+        }
+        
         public void AddUnit(Unit unit)
         {
             _units.Add(unit);
+            unit.Path = this;
         }
         
         public void AddUnits(IEnumerable<Unit> units)

@@ -2,6 +2,7 @@
 using SelectionSystem;
 using TeamSystem;
 using UnitCombatSystem;
+using UnitGroupingSystem;
 using UnitSystem.MovementSystem;
 using UnityEngine;
 using Zenject;
@@ -15,14 +16,16 @@ namespace UnitSystem.UnitFactories
         private readonly TeamsDataSO _teamsData;
         private readonly UnitContainer _unitContainer;
         private readonly UnitSelection _unitSelection;
+        private readonly UnitGrouper _unitGrouper;
         
         protected readonly UnitData _unitData;
         protected readonly DiContainer Container;
 
         protected abstract UnitType UnitType { get; }
         private int id = 0;
+        
         protected UnitFactory(DiContainer container, UnitContainer unitContainer, UnitSelection unitSelection, 
-            UnitMover unitMover, TeamsDataSO teamsData, UnitsDataSO unitsDataSO)
+            UnitMover unitMover, TeamsDataSO teamsData, UnitGrouper unitGrouper, UnitsDataSO unitsDataSO)
         {
             Container = container;
             _unitContainer = unitContainer;
@@ -31,11 +34,14 @@ namespace UnitSystem.UnitFactories
             _prefab = _unitData.Prefab;
             _unitMover = unitMover;
             _teamsData = teamsData;
+            _unitGrouper = unitGrouper;
         }
 
         public Unit Create(Vector2 position, TeamColor teamColor)
         {
-            Unit unit = Object.Instantiate(_prefab);
+            Physics.Raycast(new Vector3(position.x, 1000, position.y), Vector3.down, out RaycastHit hit, 2000);
+            Vector3 spawnPosition = hit.point;
+            Unit unit = Object.Instantiate(_prefab, spawnPosition, Quaternion.identity);
             unit.name += id;
             id++;
             unit.gameObject.layer = _teamsData.TeamByTeamColor[teamColor].Layer;
@@ -45,7 +51,7 @@ namespace UnitSystem.UnitFactories
             UpdateTimer attackRangeTimer = Container.Resolve<UpdateTimer>();
             UnitCombat combat = new UnitCombat(unit: unit,attack: attack, unitMover:_unitMover, enemyDetector:enemyDetector,
                 attackCooldownTimer: attackCooldownTimer, attackRangeTimer: attackRangeTimer);
-            UnitLifeTimeController  unitLifeTimeController = new UnitLifeTimeController(unit, _unitSelection, _unitContainer);
+            UnitLifeTimeController  unitLifeTimeController = new UnitLifeTimeController(unit, _unitGrouper,_unitSelection, _unitContainer);
             _unitContainer.AllUnits.Add(unit);
             return unit;
         }
