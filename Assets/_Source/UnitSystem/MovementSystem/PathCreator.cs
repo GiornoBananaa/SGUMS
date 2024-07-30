@@ -12,12 +12,14 @@ namespace UnitSystem.MovementSystem
     
     public class PathCreator
     {
-        private const float PATH_POINTS_DISTANCE = 0.2f;
+        private const float PATH_SCREEN_POINTS_DISTANCE = 30f;
+        private const float PATH_POINTS_DISTANCE = 1f;
         
         private readonly PathContainer _pathContainer;
         private readonly PathDrawer _pathDrawer;
         private readonly UnitMover _unitMover;
         private Path _formingPath;
+        private Vector2 _lastScreenPoint;
 
         public Action<Path> OnPathCreate;
         
@@ -42,8 +44,9 @@ namespace UnitSystem.MovementSystem
                 _formingPath.PathPoints.Add(point);
                 _pathDrawer.DrawStartPoint(_formingPath);
             }
-            if(Vector3.Distance(_formingPath.PathPoints[^1], point) < PATH_POINTS_DISTANCE) return;
-            
+            if(Vector2.Distance(_lastScreenPoint, Camera.main.WorldToScreenPoint(point)) < PATH_SCREEN_POINTS_DISTANCE
+               && Vector3.Distance(_formingPath.PathPoints[^1], point) < PATH_POINTS_DISTANCE) return;
+            _lastScreenPoint = Camera.main.WorldToScreenPoint(point);
             _formingPath.PathPoints.Add(point);
             _pathDrawer.DrawPoint(point);
         }

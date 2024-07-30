@@ -4,6 +4,7 @@ using SelectionSystem;
 using UnitGroupingSystem;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.Rendering.Universal;
 using Zenject;
 
 namespace UnitSystem.MovementSystem
@@ -13,7 +14,6 @@ namespace UnitSystem.MovementSystem
         //TODO: make the distance between the points depend on screen positions
         
         private const float LINE_HEIGHT = 0.2f;
-        private const float MIN_POINT_DISTANCE = 1;
         private readonly Dictionary<Path, PathView> _pathsViews = new();
         private readonly ObjectPool<PathView> _pathViewsPool;
         private readonly Material _lineMaterial;
@@ -22,7 +22,6 @@ namespace UnitSystem.MovementSystem
         private readonly UnitSelection _unitSelection;
         private readonly GroupSelection _groupSelection;
         private PathView _currentPathView;
-        private Vector3 _lastPoint;
         
         [Inject]
         public PathDrawer(PathDataSO pathDataSO, UnitSelection unitSelection, GroupSelection groupSelection)
@@ -51,8 +50,7 @@ namespace UnitSystem.MovementSystem
         public void DrawPoint(Vector3 point)
         {
             var newPositionsCount = _currentPathView.LineRenderer.positionCount + 1;
-            if(newPositionsCount != 0 && Vector3.Distance(point, _lastPoint) < MIN_POINT_DISTANCE) return;
-            _lastPoint = point;
+            
             _currentPathView.LineRenderer.positionCount = newPositionsCount;
             _currentPathView.LineRenderer.SetPosition(newPositionsCount - 1, point + new Vector3(0, LINE_HEIGHT, 0));
             
@@ -104,13 +102,12 @@ namespace UnitSystem.MovementSystem
             line.material = _lineMaterial;
             pathView.LineRenderer = line;
 
-            Projector endProjector = new GameObject().AddComponent<Projector>();
+            DecalProjector endProjector = new GameObject().AddComponent<DecalProjector>();
             endProjector.transform.parent = line.transform;
             endProjector.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
-            endProjector.orthographic = true;
-            endProjector.orthographicSize = 1.6f;
+            endProjector.size = new Vector3(4, 4, 1);
             endProjector.material = _endProjectorMaterial;
-            endProjector.ignoreLayers = _projectorIgnoreLayers;
+            endProjector.renderingLayerMask = (uint)_projectorIgnoreLayers.value;
             pathView.EndProjector = endProjector;
 
             return pathView;

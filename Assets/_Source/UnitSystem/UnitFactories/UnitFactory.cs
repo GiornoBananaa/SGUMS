@@ -46,7 +46,7 @@ namespace UnitSystem.UnitFactories
             id++;
             unit.gameObject.layer = _teamsData.TeamByTeamColor[teamColor].Layer;
             unit.Construct(new Health(_unitData.UnitStats.MaxHP), teamColor, new ModifiableUnitStats(_unitData.UnitStats));
-            (IEnemyDetector enemyDetector, IUnitAttack attack) = CreateCombatComponent(unit);
+            (IEnemyDetector enemyDetector, AUnitAttack attack) = CreateCombatComponent(unit);
             UpdateTimer attackCooldownTimer = Container.Resolve<UpdateTimer>();
             UpdateTimer attackRangeTimer = Container.Resolve<UpdateTimer>();
             UnitCombat combat = new UnitCombat(unit: unit,attack: attack, unitMover:_unitMover, enemyDetector:enemyDetector,
@@ -56,7 +56,7 @@ namespace UnitSystem.UnitFactories
             return unit;
         }
 
-        protected abstract (IEnemyDetector, IUnitAttack) CreateCombatComponent(Unit unit);
+        protected abstract (IEnemyDetector, AUnitAttack) CreateCombatComponent(Unit unit);
         protected abstract void CreateOtherComponents(Unit unit);
     }
 }

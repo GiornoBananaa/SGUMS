@@ -12,7 +12,7 @@ namespace UnitSystem.UnitFactories
     {
         private EnemyDetectionUpdater _enemyDetectionUpdater;
         private LayerMask _unitsLayers;
-        private IUnitAttack _attack;
+        private AUnitAttack _attack;
         
         protected override UnitType UnitType => UnitType.Melee;
         
@@ -25,7 +25,7 @@ namespace UnitSystem.UnitFactories
             _unitsLayers = detectionData.UnitsLayers;
         }
 
-        protected override (IEnemyDetector, IUnitAttack) CreateCombatComponent(Unit unit)
+        protected override (IEnemyDetector, AUnitAttack) CreateCombatComponent(Unit unit)
         {
             return (new MeleeEnemyDetector(_enemyDetectionUpdater, unit, _unitsLayers), _attack);
         }

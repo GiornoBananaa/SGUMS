@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace UnitSystem.MovementSystem
 {
     public class PathView
     {
         public LineRenderer LineRenderer;
-        public Projector EndProjector;
+        public DecalProjector EndProjector;
     }
 }

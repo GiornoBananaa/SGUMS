@@ -7,7 +7,7 @@ namespace UnitCombatSystem
 {
     public class UnitCombat
     {
-        private readonly IUnitAttack _attack;
+        private readonly AUnitAttack _attack;
         private readonly UpdateTimer _attackCooldownTimer;
         private readonly UpdateTimer _attackRangeTimer;
         private readonly IEnemyDetector _enemyDetector;
@@ -17,7 +17,7 @@ namespace UnitCombatSystem
         private bool _seesEnemy;
         private bool _isFighting;
         
-        public UnitCombat(Unit unit, UpdateTimer attackCooldownTimer, UpdateTimer attackRangeTimer, IUnitAttack attack, 
+        public UnitCombat(Unit unit, UpdateTimer attackCooldownTimer, UpdateTimer attackRangeTimer, AUnitAttack attack, 
             IEnemyDetector enemyDetector, UnitMover unitMover)
         {
             _unit = unit;

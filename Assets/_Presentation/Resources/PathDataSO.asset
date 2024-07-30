@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PathDataSO
   m_EditorClassIdentifier: 
   <PathMaterial>k__BackingField: {fileID: 2100000, guid: 10d0711cf24e48744b388d714b8c6d1c, type: 2}
-  <EndPointMaterial>k__BackingField: {fileID: 2100000, guid: 3fd409ae7f3394842921c2bd5e416681, type: 2}
+  <EndPointMaterial>k__BackingField: {fileID: 2100000, guid: fd978ede356fdc941a714ec0509a1cd0, type: 2}
   <ProjectorIgnoreLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 439
+    m_Bits: 2

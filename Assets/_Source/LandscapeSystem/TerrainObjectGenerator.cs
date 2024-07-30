@@ -18,6 +18,7 @@ namespace LandscapeSystem
         
         public void GenerateObjects(TerrainDataLoader terrainDataLoader)
         {
+            int seed = Random.Range(0, 5);
             TerrainData terrainData = terrainDataLoader.TerrainData;
             for (float i = 0; i < terrainData.size.x; i += _spacing)
             {
@@ -25,7 +26,7 @@ namespace LandscapeSystem
                 {
                     float x = i + Random.Range(-_spacing/2, _spacing/2) * _spread;
                     float y = j + Random.Range(-_spacing/2, _spacing/2) * _spread;
-                    float sample = _noise ? Mathf.PerlinNoise(x * _noiseSize, y * _noiseSize) : 1;
+                    float sample = _noise ? Mathf.PerlinNoise(x * _noiseSize + seed, y * _noiseSize + seed) : 1;
                     if(x > terrainData.size.x || y > terrainData.size.z || x < 0 || y < 0)
                         continue;
                     if (sample >= 1 - _frequency 
