@@ -15,7 +15,7 @@ namespace UnitSystem.MovementSystem
         public GroupSpeedEqualizer(UnitGroupContainer groupContainer, ServiceUpdater updater, 
             UnitGroupContainer unitGroupContainer)
         {
-            _speedModifier = new UnitStatsModifier(new ModifiableUnitStats(0,0,0,0,0));
+            _speedModifier = new UnitStatsModifier();
             groupContainer.OnGroupAdd += AddGroup;
             groupContainer.OnGroupRemove += RemoveGroup;
             

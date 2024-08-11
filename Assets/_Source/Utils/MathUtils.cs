@@ -15,5 +15,28 @@ namespace Utils
                 return true;
             return false;
         }
+        
+        public static float	RelativeAngle(this Vector3 forwardDirection, Vector3 targetDirection, Vector3 upDirection)
+        {
+            var	angle = Vector3.Angle(forwardDirection, targetDirection);
+
+            if (forwardDirection.AngleDirection(targetDirection, upDirection) == -1)
+                return -angle;
+            else
+                return angle;
+        }
+        
+        public static int AngleDirection(this Vector3 fwd, Vector3 targetDir, Vector3 up)
+        {
+            Vector3	perp = Vector3.Cross(fwd, targetDir);
+            float	dir = Vector3.Dot(perp, up);
+
+            if (dir > 0)
+                return 1;
+            else if (dir < 0)
+                return -1;
+            else
+                return 0;
+        }
     }
 }

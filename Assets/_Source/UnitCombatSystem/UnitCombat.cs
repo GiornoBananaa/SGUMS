@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnitSystem;
 using UnitSystem.MovementSystem;
 using UnityEngine;
@@ -7,71 +8,77 @@ namespace UnitCombatSystem
 {
     public class UnitCombat
     {
-        private readonly AUnitAttack _attack;
-        private readonly UpdateTimer _attackCooldownTimer;
-        private readonly UpdateTimer _attackRangeTimer;
-        private readonly IEnemyDetector _enemyDetector;
+        private readonly Dictionary<UnitType, AUnitAttack> _attacks;
+        private readonly IEnumerable<EnemyDetector> _enemyDetectors;
         private readonly UnitMover _unitMover;
-        private readonly Unit _unit;
-        private Unit _enemy;
-        private bool _seesEnemy;
-        private bool _isFighting;
         
-        public UnitCombat(Unit unit, UpdateTimer attackCooldownTimer, UpdateTimer attackRangeTimer, AUnitAttack attack, 
-            IEnemyDetector enemyDetector, UnitMover unitMover)
+        public UnitCombat(IEnumerable<AUnitAttack> attacks, IEnumerable<EnemyDetector> enemyDetectors, UnitMover unitMover)
         {
-            _unit = unit;
-            _attack = attack;
-            _enemyDetector = enemyDetector;
+            _attacks = new Dictionary<UnitType, AUnitAttack>();
+            foreach (var attack in attacks)
+            {
+                _attacks.Add(attack.UnitType, attack);
+            }
+            _enemyDetectors = enemyDetectors;
+            foreach (var detector in _enemyDetectors)
+            {
+                detector.OnDetection += AimOnEnemy;
+            }
             _unitMover = unitMover;
-            _attackCooldownTimer = attackCooldownTimer;
-            _attackRangeTimer = attackRangeTimer;
-            _attackCooldownTimer.SetMaxTime(0);
-            _attackRangeTimer.SetMaxTime(0.1f);
-            _enemyDetector.OnEnemyDetection += AimOnEnemy;
-            _attackCooldownTimer.OnTimerEnd += BecomeReadyToAttack;
         }
+        
+        private void AimOnEnemy(Unit unit, Unit enemy)
+        {
+            if(unit == null || unit.Health.IsDead) return;
+            if (enemy == null)
+            {
+                if (!unit.CombatMode) return;
+                unit.CombatMode = false;
+                _unitMover.UnFollowTargetEnemy(unit);
+                return;
+            }
+            if(enemy != null && (unit.TargetEnemy == null || (unit.TargetEnemy != null && enemy.gameObject.transform != unit.TargetEnemy.transform)))
+            {
+                if (unit.FollowEnemy)
+                {
+                    _unitMover.FollowTargetEnemy(unit, enemy.transform, unit.Stats.AttackRange * 0.75f);
+                    unit.CombatMode = true;
+                }
+                unit.TargetEnemy = enemy.transform;
+                Attack(unit, enemy);
+            }
 
-        private void BecomeReadyToAttack()
-        {
-            _attackRangeTimer.OnTimerEnd += Attack;
-            _attackRangeTimer.Restart();
+            if (unit.FollowEnemy)
+            {
+                unit.transform.LookAt(enemy.transform);
+            }
+            unit.TargetEnemy = enemy.transform;
         }
         
-        private void AimOnEnemy(Unit enemy)
+        private async void Attack(Unit unit, Unit enemy)
         {
-            if(_unit == null) return;
-            if (enemy == null && _seesEnemy)
+            if (enemy == null || unit.TargetEnemy != enemy.transform)
             {
-                _seesEnemy = false;
-                _unitMover.UnFollowTarget(_unit);
-                _attackCooldownTimer.Stop();
-            }
-            else if(enemy != null)
-            {
-                _seesEnemy = true;
-                _unitMover.FollowTarget(_unit, enemy.transform, enemy.Radius + _unit.Radius * 2);
-                _attackCooldownTimer.SetMaxTime(_unit.Stats.AttackCooldown);
-                _attackCooldownTimer.Restart();
-            }
-            _enemy = enemy;
-        }
-        
-        private void Attack()
-        {
-            if (_enemy == null)
-            {
-                _attackRangeTimer.OnTimerEnd -= Attack;
+                Debug.Log("No enemy");
                 return;
             }
-            if(_enemy.Health.IsDead || _unit.Health.IsDead
-               || Vector3.Distance(_unit.transform.position, _enemy.transform.position) > _unit.Stats.AttackRange)
+            
+            if(enemy.Health.IsDead || unit.Health.IsDead
+                                   || Vector3.Distance(unit.transform.position, enemy.transform.position) > unit.Stats.AttackRange)
             {
-                _attackRangeTimer.Restart();
+                if(!unit.IsFollowingEnemy)
+                    unit.CombatMode = false;
+                Debug.Log("long distance");
+                await Task.Delay(200);
+                Attack(unit, enemy);
                 return;
             }
-            _attackRangeTimer.OnTimerEnd -= Attack;
-            _attack.Attack(_unit, _enemy);
+            unit.CombatMode = true;
+            _attacks[unit.UnitType].Attack(unit, enemy);
+            Debug.Log("Attack!");
+            await Task.Delay((int)(unit.Stats.AttackCooldown*1000));
+            
+            Attack(unit, enemy);
         }
     }
 }

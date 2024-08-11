@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
-using UnitSystem;
+﻿using UnitSystem;
 using UnityEngine;
 
 namespace UnitCombatSystem
 {
-    public class MeleeAttack: AUnitAttack
+    public abstract class MeleeAttack: AUnitAttack
     {
-        protected override IEnumerable<IAttackModifier> AttackModifiers => new IAttackModifier[]
-        {
-            
-        };
-
         protected override void StartAnimation(Unit unit, Unit enemy)
         {
-            
+            unit.Animator.SetTrigger(ATTACK_ANIMATOR_TRIGGER);
         }
+
+        protected override void StopAnimation(Unit unit, Unit enemy) { }
 
         protected override float GetAttackDelay(Unit unit, Unit enemy)
         {

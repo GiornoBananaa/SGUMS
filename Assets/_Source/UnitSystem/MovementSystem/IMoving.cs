@@ -1,6 +1,4 @@
-﻿using UnitSystem.MovementSystem;
-
-namespace UnitGroupingSystem
+﻿namespace UnitSystem.MovementSystem
 {
     public interface IMoving
     {

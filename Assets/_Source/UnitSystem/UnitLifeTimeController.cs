@@ -8,7 +8,7 @@ namespace UnitSystem
         private readonly Unit _unit;
         private readonly UnitContainer _unitContainer;
         private readonly UnitSelection _unitSelection;
-        private UnitGrouper _unitGrouper;
+        private readonly UnitGrouper _unitGrouper;
 
         public UnitLifeTimeController(Unit unit, UnitGrouper unitGrouper, UnitSelection unitSelection, UnitContainer unitContainer)
         {
@@ -25,7 +25,7 @@ namespace UnitSystem
             if (_unitSelection.IsSelected(_unit))
                 _unitSelection.Deselect(_unit);
             
-            _unitContainer.AllUnits.Remove(_unit);
+            _unitContainer.Remove(_unit);
             
             if(_unit.UnitCrowd!=null)
             {

@@ -3,6 +3,9 @@
     public enum UnitType
     {
         Peasant = 0,
-        Melee = 1
+        Spear = 1,
+        Archer = 2,
+        Shield = 3,
+        Cavalry = 4,
     }
 }

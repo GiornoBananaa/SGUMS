@@ -14,22 +14,27 @@ namespace UnitSystem
     {
         [field: SerializeField] public Projector SelectionProjector { get; private set; }
         [field: SerializeField] public NavMeshAgent NavMeshAgent { get; private set; }
+        [field: SerializeField] public Animator Animator { get; private set; }
+        [field: SerializeField] public ParticleSystem AttackEffect { get; private set; }
         [field: SerializeField] public float Radius { get; private set; }
         
         private bool _trackNavigation;
         private bool _combatMode;
-
+        
         public Dictionary<IUnitModifier, UnitStats> Modifiers { get; private set; } = new();
         public Health Health { get; private set; }
         public ModifiableUnitStats Stats { get; private set; }
         public Crowd UnitCrowd { get; set; }
         public Path Path { get; set; }
-        public Transform Target { get; set; }
+        public Transform TargetEnemy { get; set; }
         public Vector2 TargetOffset { get; set; }
         public Vector2 PathOffset { get; set; }
         public TeamColor TeamColor { get; set; }
+        public UnitType UnitType { get; set; }
         public int PathPointIndex { get; set; }
         public bool IsMoving { get; private set; }
+        public bool IsFollowingEnemy { get; set; }
+        public bool FollowEnemy { get; set; } = true;
         public int TerrainUnderUnit { get; set; }
         public bool CombatMode
         {
@@ -43,15 +48,15 @@ namespace UnitSystem
             }
         }
         
-
         public event Action<Unit> OnDestinationReached;
         public event Action<Unit> OnPathEnd;
         
-        public void Construct(Health health, TeamColor teamColor, ModifiableUnitStats stats)
+        public void Construct(Health health, ModifiableUnitStats stats, TeamColor teamColor, UnitType unitType)
         {
             Health = health;
             Stats = stats;
             TeamColor = teamColor;
+            UnitType = unitType;
             Stats.OnSpeedChange += OnSpeedChanged;
         }
         

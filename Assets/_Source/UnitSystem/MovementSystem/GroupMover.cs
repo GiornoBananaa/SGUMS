@@ -31,7 +31,7 @@ namespace UnitSystem.MovementSystem
 
         private bool CheckLaggingUnits(Group group)
         {
-            foreach (var unit in group.LaggingUnits.ToList().Where(unit => !unit.IsMoving && unit.CombatMode))
+            foreach (var unit in group.LaggingUnits.ToList().Where(unit => !unit.IsMoving && !unit.CombatMode))
             {
                 group.LaggingUnits.Remove(unit);
             }

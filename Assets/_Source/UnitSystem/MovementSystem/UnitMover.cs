@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnitGroupingSystem;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
@@ -34,30 +35,46 @@ namespace UnitSystem.MovementSystem
             }
         }
 
-        public void FollowTarget(Unit unit, Transform transform, float range)
+        public void FollowTargetEnemy(Unit unit, Transform target, float range)
         {
             if (unit.UnitCrowd is Group group)
             {
                 group.LaggingUnits.Add(unit);
                 unit.OnPathEnd += group.AddUnitReachedDestination;
             }
-            unit.CombatMode = true;
-            unit.Target = transform;
-            unit.TargetOffset = (unit.transform.position - transform.position).normalized * range;
-            UpdateUnitPath(unit);
+            unit.IsFollowingEnemy = true;
+            unit.NavMeshAgent.updateRotation = false;
+            unit.transform.LookAt(target);
+            unit.TargetEnemy = target;
+            Vector3 offset = (unit.transform.position - target.position).normalized * range;
+            unit.TargetOffset = new Vector2(offset.x, offset.z);
+            unit.EndNavigationTracking();
+            FollowEnemyUpdate(unit);
         }
         
-        public void UnFollowTarget(Unit unit)
+        public void UnFollowTargetEnemy(Unit unit)
         {
-            bool updated = unit.CombatMode;
-            unit.Target = null;
+            bool updated = unit.IsFollowingEnemy;
+            unit.TargetEnemy = null;
             if (!updated) return;
-            unit.CombatMode = false;
+            unit.IsFollowingEnemy = false;
+            unit.NavMeshAgent.updateRotation = true;
             if (unit.Path != null && unit.PathPointIndex - 1 >= 0)
             {
                 unit.NavMeshAgent.SetDestination(unit.Path.PathPoints[unit.PathPointIndex-1] 
                                                  + new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y));
                 unit.StartNavigationTracking();
+            }
+        }
+
+        private async void FollowEnemyUpdate(Unit unit)
+        {
+            while (unit != null|| unit.IsFollowingEnemy || unit.TargetEnemy != null)
+            {
+                Vector3 destination = unit.TargetEnemy.transform.position +
+                                      new Vector3(unit.TargetOffset.x, 0, unit.TargetOffset.y);
+                unit.NavMeshAgent.SetDestination(destination);
+                await Task.Delay(200);
             }
         }
         
@@ -73,30 +90,20 @@ namespace UnitSystem.MovementSystem
         private void UpdateUnitPath(Unit unit)
         {
             unit.OnDestinationReached -= UpdateUnitPath;
-            if(unit.Health.IsDead) return;
-            Vector3 destination;
-            if (unit.Target != null)
+            
+            if(unit.Health.IsDead || unit.Path == null || unit.CombatMode) return;
+            
+            if (unit.PathPointIndex >= unit.Path.PathPoints.Count)
             {
-                destination = unit.Target.transform.position + (Vector3)unit.TargetOffset;
-            }
-            else if(unit.Path == null || unit.CombatMode)
-            {
+                unit.Path.RemoveUnit(unit);
                 return;
             }
-            else
-            {
-                if (unit.PathPointIndex >= unit.Path.PathPoints.Count)
-                {
-                    unit.Path.RemoveUnit(unit);
-                    return;
-                }
 
-                var offset = new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y) +
-                             new Vector3(unit.UnitCrowd.Offset.x, 0, unit.UnitCrowd.Offset.y);
+            var offset = new Vector3(unit.PathOffset.x, 0, unit.PathOffset.y) +
+                         new Vector3(unit.UnitCrowd.Offset.x, 0, unit.UnitCrowd.Offset.y);
                 
-                destination = unit.Path.PathPoints[unit.PathPointIndex] + offset;
-                unit.PathPointIndex += 1;
-            }
+            Vector3 destination = unit.Path.PathPoints[unit.PathPointIndex] + offset;
+            unit.PathPointIndex += 1;
             
             unit.NavMeshAgent.SetDestination(destination);
             unit.OnDestinationReached += UpdateUnitPath;

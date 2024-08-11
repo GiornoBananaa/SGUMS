@@ -13,6 +13,11 @@ namespace UnitSystem.UnitModifierSystem
             StatsModifiers = statsModifiers;
         }
 
+        public UnitStatsModifier()
+        {
+            StatsModifiers = new ModifiableUnitStats(0, 0, 0, 0, 0, 0);
+        }
+        
         public bool ApplyModifier(Unit unit)
         {
             if(unit.Modifiers.ContainsKey(this)) return false;

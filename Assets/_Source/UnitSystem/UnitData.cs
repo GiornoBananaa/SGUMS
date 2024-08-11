@@ -20,14 +20,16 @@ namespace UnitSystem
         public float Speed;
         public float AttackCooldown;
         public float AttackRange;
-
-        public UnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange)
+        public float DetectionRange;
+        
+        public UnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange, float detectionRange)
         {
             MaxHP = maxHP;
             Attack = attack;
             Speed = speed;
             AttackCooldown = attackCooldown;
             AttackRange = attackRange;
+            DetectionRange = detectionRange;
         }
     }
     
@@ -39,31 +41,35 @@ namespace UnitSystem
         [field: SerializeField] public float BaseSpeed { get; private set; }
         [field: SerializeField] public float BaseAttackCooldown { get; private set; }
         [field: SerializeField] public float BaseAttackRange { get; private set; }
+        [field: SerializeField] public float BaseDetectionRange { get; private set; }
         
         public int HPModifier { get; set; }
         public int AttackModifier { get; set; }
         public float SpeedModifier { get; set; }
         public float AttackCooldownModifier { get; set; }
         public float AttackRangeModifier { get; set; }
+        public float DetectionRangeModifier { get; set; }
         
         public int MaxHP => BaseMaxHP + HPModifier;
         public int Attack => BaseAttack + AttackModifier;
         public float Speed => BaseSpeed + SpeedModifier;
         public float AttackCooldown => BaseAttackCooldown + AttackCooldownModifier;
         public float AttackRange => BaseAttackRange + AttackRangeModifier;
-
-        public UnitStats UnitStats => new UnitStats(MaxHP, Attack, Speed, AttackCooldown, AttackRange);
+        public float DetectionRange => BaseDetectionRange + DetectionRangeModifier;
+        
+        public UnitStats UnitStats => new UnitStats(MaxHP, Attack, Speed, AttackCooldown, AttackRange, DetectionRange);
         public event Action OnSpeedChange;
-
-        public ModifiableUnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange)
+        
+        public ModifiableUnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange, float detectionRange)
         {
             BaseMaxHP = maxHP;
             BaseAttack =  attack;
             BaseSpeed = speed;
             BaseAttackCooldown = attackCooldown;
             BaseAttackRange = attackRange;
+            BaseDetectionRange = detectionRange;
         }
-
+        
         public ModifiableUnitStats(UnitStats unitDataUnitStats)
         {
             BaseMaxHP = unitDataUnitStats.MaxHP;
@@ -71,8 +77,9 @@ namespace UnitSystem
             BaseSpeed = unitDataUnitStats.Speed;
             BaseAttackCooldown = unitDataUnitStats.AttackCooldown;
             BaseAttackRange = unitDataUnitStats.AttackRange;
+            BaseDetectionRange = unitDataUnitStats.DetectionRange;
         }
-
+        
         public void AddStats(UnitStats otherStats)
         {
             HPModifier += otherStats.MaxHP;
@@ -80,6 +87,7 @@ namespace UnitSystem
             SpeedModifier += otherStats.Speed;
             AttackCooldownModifier += otherStats.AttackCooldown;
             AttackRangeModifier += otherStats.AttackRange;
+            DetectionRangeModifier += otherStats.DetectionRange;
             CheckChange(otherStats);
         }
         
@@ -90,9 +98,10 @@ namespace UnitSystem
             SpeedModifier -= otherStats.Speed;
             AttackCooldownModifier -= otherStats.AttackCooldown;
             AttackRangeModifier -= otherStats.AttackRange;
+            DetectionRangeModifier -= otherStats.DetectionRange;
             CheckChange(otherStats);
         }
-
+        
         private void CheckChange(UnitStats otherStats)
         {
             if(otherStats.Speed != 0)
@@ -108,6 +117,7 @@ namespace UnitSystem
                 AttackRangeModifier = AttackRangeModifier,
                 SpeedModifier = SpeedModifier,
                 HPModifier = HPModifier,
+                DetectionRangeModifier = DetectionRangeModifier,
             };
         }
     }

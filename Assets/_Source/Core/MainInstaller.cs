@@ -68,7 +68,10 @@ namespace Core
             Container.Bind<OrderContainer>().AsSingle();
             //Unit
             Container.Bind<UnitContainer>().AsSingle().WithArguments(_testUnits);
-            Container.Bind<MeleeUnitFactory>().AsSingle();
+            Container.Bind<UnitSpawner>().AsSingle();
+            Container.Bind<UnitFactory>().To<SpearUnitFactory>().AsSingle();
+            Container.Bind<UnitFactory>().To<ShieldUnitFactory>().AsSingle();
+            Container.Bind<UnitFactory>().To<ArcherUnitFactory>().AsSingle();
             //Input
             Container.Bind<InputListener>().FromInstance(_inputListener).AsSingle();
             //Movement
@@ -83,8 +86,12 @@ namespace Core
             Container.Bind<FormationPlacer>().AsSingle();
             Container.Bind<GroupSpeedEqualizer>().AsSingle().NonLazy();
             //Combat
-            Container.Bind<EnemyDetectionUpdater>().AsSingle();
-            Container.Bind<MeleeAttack>().AsSingle();
+            Container.Bind<UnitCombat>().AsSingle().NonLazy();
+            Container.Bind<EnemyDetector>().To<MeleeEnemyDetector>().AsSingle();
+            Container.Bind<EnemyDetector>().To<ArcherEnemyDetector>().AsSingle();
+            Container.Bind<AUnitAttack>().To<SpearAttack>().AsSingle();
+            Container.Bind<AUnitAttack>().To<ShieldAttack>().AsSingle();
+            Container.Bind<AUnitAttack>().To<ArcherAttack>().AsSingle();
             //Grouping
             Container.Bind<GroupEmblemFactory>().AsSingle().WithArguments(_groupEmblemPrefab, _groupEmblemParent);
             Container.Bind<UnitGroupContainer>().AsSingle();
