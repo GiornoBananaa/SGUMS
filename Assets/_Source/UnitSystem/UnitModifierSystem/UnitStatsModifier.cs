@@ -15,7 +15,7 @@ namespace UnitSystem.UnitModifierSystem
 
         public UnitStatsModifier()
         {
-            StatsModifiers = new ModifiableUnitStats(0, 0, 0, 0, 0, 0);
+            StatsModifiers = new ModifiableUnitStats();
         }
         
         public bool ApplyModifier(Unit unit)

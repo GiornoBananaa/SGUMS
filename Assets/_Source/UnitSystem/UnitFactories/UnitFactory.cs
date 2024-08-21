@@ -39,7 +39,9 @@ namespace UnitSystem.UnitFactories
             unit.gameObject.layer = _teamsData.TeamByTeamColor[teamColor].Layer;
             unit.Construct(new Health(_unitData.UnitStats.MaxHP), new ModifiableUnitStats(_unitData.UnitStats), teamColor, UnitType);
             UnitLifeTimeController  unitLifeTimeController = new UnitLifeTimeController(unit, _unitGrouper,_unitSelection, _unitContainer);
-            unit.GetComponent<MeshRenderer>().material.color = _teamsData.TeamByTeamColor[teamColor].Color;
+            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+            propertyBlock.SetColor("_BaseColor", _teamsData.TeamByTeamColor[teamColor].Color);
+            unit.GetComponent<MeshRenderer>().SetPropertyBlock(propertyBlock); 
             _unitContainer.Add(unit);
             return unit;
         }

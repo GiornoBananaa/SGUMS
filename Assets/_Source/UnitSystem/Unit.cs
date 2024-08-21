@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FogOfWarSystem;
 using SelectionSystem;
 using TeamSystem;
 using UnitGroupingSystem;
@@ -7,16 +8,18 @@ using UnitSystem.MovementSystem;
 using UnitSystem.UnitModifierSystem;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering.Universal;
 
 namespace UnitSystem
 {
     public class Unit : MonoBehaviour, ISelectable, IMoving
     {
-        [field: SerializeField] public Projector SelectionProjector { get; private set; }
+        [field: SerializeField] public float Radius { get; private set; }
+        [field: SerializeField] public FieldOfView FieldOfView { get; private set; }
+        [field: SerializeField] public DecalProjector SelectionProjector { get; private set; }
         [field: SerializeField] public NavMeshAgent NavMeshAgent { get; private set; }
         [field: SerializeField] public Animator Animator { get; private set; }
         [field: SerializeField] public ParticleSystem AttackEffect { get; private set; }
-        [field: SerializeField] public float Radius { get; private set; }
         
         private bool _trackNavigation;
         private bool _combatMode;
@@ -57,6 +60,7 @@ namespace UnitSystem
             Stats = stats;
             TeamColor = teamColor;
             UnitType = unitType;
+            FieldOfView.SetSize(stats.ViewRange*2);
             Stats.OnSpeedChange += OnSpeedChanged;
         }
         

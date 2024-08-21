@@ -21,6 +21,7 @@ MonoBehaviour:
       AttackCooldown: 0.5
       AttackRange: 2
       DetectionRange: 4
+      ViewRange: 30
     <Prefab>k__BackingField: {fileID: 8599376515691246701, guid: cdba5ab99f43e40429467b182b157a01, type: 3}
   - <UnitType>k__BackingField: 1
     <UnitStats>k__BackingField:
@@ -30,16 +31,8 @@ MonoBehaviour:
       AttackCooldown: 0.5
       AttackRange: 3
       DetectionRange: 4
+      ViewRange: 30
     <Prefab>k__BackingField: {fileID: 8599376515691246701, guid: cdba5ab99f43e40429467b182b157a01, type: 3}
-  - <UnitType>k__BackingField: 2
-    <UnitStats>k__BackingField:
-      MaxHP: 100
-      Attack: 25
-      Speed: 4
-      AttackCooldown: 0.5
-      AttackRange: 10
-      DetectionRange: 10
-    <Prefab>k__BackingField: {fileID: 8599376515691246701, guid: 0cdff05a7247fcd46a278259d38c7d74, type: 3}
   - <UnitType>k__BackingField: 3
     <UnitStats>k__BackingField:
       MaxHP: 100
@@ -48,4 +41,15 @@ MonoBehaviour:
       AttackCooldown: 0.5
       AttackRange: 2
       DetectionRange: 4
+      ViewRange: 30
     <Prefab>k__BackingField: {fileID: 8599376515691246701, guid: 19f56a33cf9660c408fcf2237ecc34eb, type: 3}
+  - <UnitType>k__BackingField: 2
+    <UnitStats>k__BackingField:
+      MaxHP: 100
+      Attack: 25
+      Speed: 4
+      AttackCooldown: 0.5
+      AttackRange: 10
+      DetectionRange: 10
+      ViewRange: 50
+    <Prefab>k__BackingField: {fileID: 8599376515691246701, guid: 0cdff05a7247fcd46a278259d38c7d74, type: 3}

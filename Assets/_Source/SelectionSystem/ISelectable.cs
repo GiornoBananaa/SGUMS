@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace SelectionSystem
 {
     public interface ISelectable
     {
-        Projector SelectionProjector { get; }
+        DecalProjector SelectionProjector { get; }
     }
 }

@@ -21,8 +21,9 @@ namespace UnitSystem
         public float AttackCooldown;
         public float AttackRange;
         public float DetectionRange;
+        public float ViewRange;
         
-        public UnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange, float detectionRange)
+        public UnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange, float detectionRange, float viewRange)
         {
             MaxHP = maxHP;
             Attack = attack;
@@ -30,6 +31,7 @@ namespace UnitSystem
             AttackCooldown = attackCooldown;
             AttackRange = attackRange;
             DetectionRange = detectionRange;
+            ViewRange = viewRange;
         }
     }
     
@@ -42,6 +44,7 @@ namespace UnitSystem
         [field: SerializeField] public float BaseAttackCooldown { get; private set; }
         [field: SerializeField] public float BaseAttackRange { get; private set; }
         [field: SerializeField] public float BaseDetectionRange { get; private set; }
+        [field: SerializeField] public float BaseViewRange { get; private set; }
         
         public int HPModifier { get; set; }
         public int AttackModifier { get; set; }
@@ -49,6 +52,7 @@ namespace UnitSystem
         public float AttackCooldownModifier { get; set; }
         public float AttackRangeModifier { get; set; }
         public float DetectionRangeModifier { get; set; }
+        public float ViewRangeModifier { get; set; }
         
         public int MaxHP => BaseMaxHP + HPModifier;
         public int Attack => BaseAttack + AttackModifier;
@@ -56,11 +60,12 @@ namespace UnitSystem
         public float AttackCooldown => BaseAttackCooldown + AttackCooldownModifier;
         public float AttackRange => BaseAttackRange + AttackRangeModifier;
         public float DetectionRange => BaseDetectionRange + DetectionRangeModifier;
+        public float ViewRange => BaseViewRange + ViewRangeModifier;
         
-        public UnitStats UnitStats => new UnitStats(MaxHP, Attack, Speed, AttackCooldown, AttackRange, DetectionRange);
+        public UnitStats UnitStats => new UnitStats(MaxHP, Attack, Speed, AttackCooldown, AttackRange, DetectionRange, ViewRange);
         public event Action OnSpeedChange;
         
-        public ModifiableUnitStats(int maxHP, int attack, float speed, float attackCooldown, float attackRange, float detectionRange)
+        public ModifiableUnitStats(int maxHP = 0, int attack = 0, float speed = 0, float attackCooldown = 0, float attackRange = 0, float detectionRange = 0, float viewRange = 0)
         {
             BaseMaxHP = maxHP;
             BaseAttack =  attack;
@@ -68,6 +73,7 @@ namespace UnitSystem
             BaseAttackCooldown = attackCooldown;
             BaseAttackRange = attackRange;
             BaseDetectionRange = detectionRange;
+            BaseViewRange = viewRange;
         }
         
         public ModifiableUnitStats(UnitStats unitDataUnitStats)
@@ -78,6 +84,7 @@ namespace UnitSystem
             BaseAttackCooldown = unitDataUnitStats.AttackCooldown;
             BaseAttackRange = unitDataUnitStats.AttackRange;
             BaseDetectionRange = unitDataUnitStats.DetectionRange;
+            BaseViewRange = unitDataUnitStats.ViewRange;
         }
         
         public void AddStats(UnitStats otherStats)
@@ -88,6 +95,7 @@ namespace UnitSystem
             AttackCooldownModifier += otherStats.AttackCooldown;
             AttackRangeModifier += otherStats.AttackRange;
             DetectionRangeModifier += otherStats.DetectionRange;
+            ViewRangeModifier += otherStats.ViewRange;
             CheckChange(otherStats);
         }
         
@@ -99,6 +107,7 @@ namespace UnitSystem
             AttackCooldownModifier -= otherStats.AttackCooldown;
             AttackRangeModifier -= otherStats.AttackRange;
             DetectionRangeModifier -= otherStats.DetectionRange;
+            ViewRangeModifier -= otherStats.ViewRange;
             CheckChange(otherStats);
         }
         
@@ -118,6 +127,7 @@ namespace UnitSystem
                 SpeedModifier = SpeedModifier,
                 HPModifier = HPModifier,
                 DetectionRangeModifier = DetectionRangeModifier,
+                ViewRangeModifier = ViewRange,
             };
         }
     }
